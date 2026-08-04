@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Staff Sidebar -->
+    <div class="col-md-3 mb-4">
+        <div class="list-group shadow-sm">
+            <a href="{{ url_for('staff.dashboard') }}" class="list-group-item list-group-item-action text-forest fw-bold">📊 My Dashboard</a>
+            <a href="{{ url_for('staff.assigned_treks') }}" class="list-group-item list-group-item-action">🎒 My Assigned Treks</a>
+        </div>
+    </div>
+    
+    <!-- Main Staff Content Area -->
+    <div class="col-md-9">
+        {% block staff_content %}{% end block %}
+    </div>
+</div>
+{% end block %}
