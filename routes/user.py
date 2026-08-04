@@ -21,8 +21,29 @@ def user_required(f):
 @login_required
 @user_required
 def dashboard():
-    all_treks = Trek.query.order_by(Trek.start_date.asc()).all()
-    return render_template('user/dashboard.html', treks=all_treks)
+    search = request.args.get('search', '').strip()
+    difficulty = request.args.get('difficulty', '').strip()
+    location = request.args.get('location', '').strip()
+
+    trek_query = Trek.query.filter_by(status='Upcoming')
+    if search:
+        trek_query = trek_query.filter(
+            (Trek.trek_name.ilike(f'%{search}%')) |
+            (Trek.location.ilike(f'%{search}%'))
+        )
+    if difficulty:
+        trek_query = trek_query.filter_by(difficulty=difficulty)
+    if location:
+        trek_query = trek_query.filter_by(location=location)
+
+    all_treks = trek_query.order_by(Trek.start_date.asc()).all()
+    locations = [row[0] for row in db.session.query(Trek.location).distinct().order_by(Trek.location).all()]
+    return render_template('user/dashboard.html',
+                           treks=all_treks,
+                           locations=locations,
+                           search=search,
+                           difficulty=difficulty,
+                           location=location)
 
 
 @user_bp.route('/treks/<int:trek_id>')
@@ -66,6 +87,28 @@ def book_trek(trek_id):
 def my_bookings():
     bookings = Booking.query.filter_by(user_id=current_user.id).order_by(Booking.booking_date.desc()).all()
     return render_template('user/my_bookings.html', bookings=bookings)
+
+
+@user_bp.route('/bookings/<int:booking_id>/cancel', methods=['POST'])
+@login_required
+@user_required
+def cancel_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    if booking.user_id != current_user.id:
+        flash('You can cancel only your own booking.', 'danger')
+        return redirect(url_for('user.my_bookings'))
+    if booking.status != 'Confirmed':
+        flash('This booking is already cancelled or completed.', 'warning')
+        return redirect(url_for('user.my_bookings'))
+    if booking.trek.status == 'Completed':
+        flash('Completed trek booking cannot be cancelled.', 'warning')
+        return redirect(url_for('user.my_bookings'))
+
+    booking.status = 'Cancelled'
+    booking.trek.available_slots += 1
+    db.session.commit()
+    flash('Booking cancelled successfully.', 'success')
+    return redirect(url_for('user.my_bookings'))
 
 
 @user_bp.route('/history')

@@ -1,65 +1,227 @@
-/* TrailMate Custom Theme - Mountain Inspired */
-
 :root {
-    --forest-green: #2d5a27;
-    --forest-green-dark: #1e3d1a;
-    --light-grey: #f8f9fa;
-    --mountain-slate: #4a5568;
+    --green: #245c45;
+    --dark-green: #173c2f;
+    --page-bg: #f4f6f5;
+    --text-dark: #263238;
+    --text-light: #667085;
+    --line: #d9e0dc;
 }
 
 body {
-    background-color: var(--light-grey);
-    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--mountain-slate);
+    margin: 0;
+    background-color: var(--page-bg);
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: var(--text-dark);
 }
 
-/* Custom Forest Colors */
 .text-forest {
-    color: var(--forest-green) !important;
+    color: var(--green) !important;
 }
 
 .bg-forest {
-    background-color: var(--forest-green) !important;
+    background-color: var(--green) !important;
     color: white !important;
 }
 
-/* Custom Buttons */
 .btn-forest {
-    background-color: var(--forest-green);
+    background-color: var(--green);
     color: white;
-    border: none;
-    transition: all 0.3s ease; /* Smooth hover transition */
+    border: 1px solid var(--green);
 }
 
 .btn-forest:hover {
-    background-color: var(--forest-green-dark);
+    background-color: var(--dark-green);
+    border-color: var(--dark-green);
     color: white;
-    transform: translateY(-2px); /* Micro-animation */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .btn-outline-forest {
-    color: var(--forest-green);
-    border-color: var(--forest-green);
-    transition: all 0.3s ease;
+    color: var(--green);
+    border-color: var(--green);
 }
 
 .btn-outline-forest:hover {
-    background-color: var(--forest-green);
+    background-color: var(--green);
     color: white;
 }
 
-/* Card Hover Effects */
-.card {
-    transition: all 0.3s ease;
+.btn-primary {
+    background-color: var(--green);
+    border-color: var(--green);
 }
 
-.card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+.btn-primary:hover {
+    background-color: var(--dark-green);
+    border-color: var(--dark-green);
 }
 
-/* Navbar styling */
-.navbar-brand {
-    letter-spacing: 1px;
+.card,
+.table,
+.form-control,
+.form-select,
+.btn {
+    border-radius: 6px;
+}
+
+.app-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 245px;
+    background-color: var(--dark-green);
+    padding: 22px 18px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.sidebar .list-group-item {
+    background-color: transparent;
+    color: #e7efeb;
+    border: none;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    padding: 10px 12px;
+    font-size: 15px;
+}
+
+.sidebar .list-group-item:hover,
+.sidebar .list-group-item.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.content-area {
+    flex: 1;
+    padding: 28px;
+    background-color: var(--page-bg);
+    overflow-y: auto;
+}
+
+.auth-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.page-box {
+    background-color: white;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 8px 22px rgba(25, 55, 45, 0.06);
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.page-subtitle {
+    color: var(--text-light);
+    margin-bottom: 20px;
+}
+
+.stat-box {
+    background: white;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--green);
+    border-radius: 8px;
+    padding: 18px;
+    min-height: 110px;
+}
+
+.stat-box h6 {
+    color: var(--text-light);
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.stat-box h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.table-box {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow-x: auto;
+    background: white;
+}
+
+.table-box .table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: #edf3f0;
+    color: #34443e;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+.filter-box {
+    background: #f8faf9;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 18px;
+}
+
+.status-label {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 20px;
+    font-size: 13px;
+    background-color: #eef2f6;
+    color: #344054;
+}
+
+.status-active,
+.status-confirmed,
+.status-upcoming {
+    background-color: #e5f6ec;
+    color: #237044;
+}
+
+.status-pending,
+.status-ongoing {
+    background-color: #fff3cd;
+    color: #8a6200;
+}
+
+.status-inactive,
+.status-rejected,
+.status-cancelled {
+    background-color: #fde8e8;
+    color: #b42318;
+}
+
+.status-completed {
+    background-color: #e8eefc;
+    color: #2f54a3;
+}
+
+@media (max-width: 800px) {
+    .app-wrapper {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .content-area {
+        padding: 16px;
+    }
 }

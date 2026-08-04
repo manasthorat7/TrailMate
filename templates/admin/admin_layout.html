@@ -1,24 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4>Trekking Management Application</h4>
-    <div>
-        <span class="me-3">👤 Admin</span>
-        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-3">
-        <div class="list-group">
+<div class="app-wrapper">
+    <div class="sidebar d-flex flex-column">
+        <div class="mb-4 text-center">
+            <h4 class="text-white fw-bold mb-0">TrailMate</h4>
+            <small class="text-white-50">Admin Panel</small>
+        </div>
+
+        <div class="list-group list-group-flush flex-grow-1">
             <a href="{{ url_for('admin.dashboard') }}" class="list-group-item list-group-item-action">Dashboard</a>
             <a href="{{ url_for('admin.manage_treks') }}" class="list-group-item list-group-item-action">Treks</a>
             <a href="{{ url_for('admin.manage_staff') }}" class="list-group-item list-group-item-action">Staff</a>
             <a href="{{ url_for('admin.manage_users') }}" class="list-group-item list-group-item-action">Users</a>
             <a href="{{ url_for('admin.view_bookings') }}" class="list-group-item list-group-item-action">Bookings</a>
         </div>
+
+        <div class="mt-auto pt-4 border-top border-secondary">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="small text-white-50">Admin User</span>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm px-3">Logout</a>
+            </div>
+        </div>
     </div>
-    <div class="col-md-9">
-        {% block admin_content %}{% endblock %}
+
+    <div class="content-area">
+        <div class="page-box">
+            {% block admin_content %}{% endblock %}
+        </div>
     </div>
 </div>
 {% endblock %}

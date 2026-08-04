@@ -1,33 +1,41 @@
 {% extends "base.html" %}
 {% block title %}Register - TrailMate{% endblock %}
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5">
-        <div class="card shadow-sm">
-            <div class="card-header bg-white"><h4 class="mb-0">Trekking Management Application</h4></div>
-            <div class="card-body p-4 text-center">
-                <h3 class="mb-4">Register</h3>
+<div class="auth-wrapper py-5">
+    <div class="w-100" style="max-width: 450px;">
+        <div class="text-center mb-4">
+            <h2 class="text-forest fw-bold">TrailMate</h2>
+            <p class="text-muted">Create a trekker or staff account</p>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="mb-4 text-center">Create an Account</h4>
                 <form method="POST">
                     <div class="mb-3">
+                        <label class="form-label">Full Name</label>
                         <input type="text" class="form-control" name="name" placeholder="Full Name" required>
                     </div>
                     <div class="mb-3">
-                        <input type="email" class="form-control" name="email" placeholder="Email" required>
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" placeholder="Email Address" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Password</label>
                         <input type="password" class="form-control" name="password" placeholder="Password" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Register As</label>
                         <select class="form-select" name="role">
-                            <option value="user">I am a User (Trekker)</option>
-                            <option value="staff">I am a Trek Staff</option>
+                            <option value="user">I am a Trekker (User)</option>
+                            <option value="staff">I am a Trek Guide (Staff)</option>
                         </select>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
+                        <label class="form-label">Contact Details</label>
                         <input type="text" class="form-control" name="contact_details" placeholder="Contact Details (Optional)">
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Register</button>
-                    <p class="text-muted">Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+                    <button type="submit" class="btn btn-forest w-100 mb-3">Register</button>
+                    <p class="text-center text-muted mb-0">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-forest text-decoration-none fw-bold">Sign In</a></p>
                 </form>
             </div>
         </div>

@@ -1,51 +1,57 @@
 {% extends "admin/admin_layout.html" %}
 {% block title %}Manage Staff{% endblock %}
 {% block admin_content %}
-<h4>Staff Requests</h4>
-<table class="table table-bordered bg-white shadow-sm mb-5">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for staff in pending_staff %}
-        <tr>
-            <td>{{ staff.name }}</td>
-            <td>{{ staff.email }}</td>
-            <td>{{ staff.status }}</td>
-            <td>
-                <form method="POST" class="d-inline">
-                    <input type="hidden" name="staff_id" value="{{ staff.id }}">
-                    <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">Approve</button>
-                    <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<h3 class="page-title">Staff</h3>
+<p class="page-subtitle">Approve staff requests and manage active staff accounts.</p>
 
-<h4>Active Staff</h4>
-<table class="table table-bordered bg-white shadow-sm">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for staff in active_staff %}
-        <tr>
-            <td>{{ staff.name }}</td>
-            <td>{{ staff.email }}</td>
-            <td>{{ staff.status }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<form method="GET" class="row g-2 filter-box">
+    <div class="col-md-5">
+        <input type="text" name="search" class="form-control" value="{{ search }}" placeholder="Search staff name or email">
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+    </div>
+    <div class="col-md-2">
+        <a href="{{ url_for('admin.manage_staff') }}" class="btn btn-outline-secondary w-100">Clear</a>
+    </div>
+</form>
+
+<div class="table-box">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for staff in staff_list %}
+            <tr>
+                <td>{{ staff.name }}</td>
+                <td>{{ staff.email }}</td>
+                <td><span class="status-label status-{{ staff.status|lower }}">{{ staff.status }}</span></td>
+                <td>
+                    <form method="POST" class="d-inline">
+                        <input type="hidden" name="staff_id" value="{{ staff.id }}">
+                        {% if staff.status == 'Pending' %}
+                            <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">Approve</button>
+                            <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
+                        {% elif staff.status == 'Active' %}
+                            <button type="submit" name="action" value="deactivate" class="btn btn-sm btn-outline-danger">Blacklist</button>
+                        {% else %}
+                            <button type="submit" name="action" value="activate" class="btn btn-sm btn-outline-success">Activate</button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">No staff found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

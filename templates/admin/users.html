@@ -1,23 +1,55 @@
 {% extends "admin/admin_layout.html" %}
 {% block title %}Users{% endblock %}
 {% block admin_content %}
-<h4>Users</h4>
-<table class="table table-bordered bg-white shadow-sm">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Contact</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in users %}
-        <tr>
-            <td>{{ user.name }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.contact_details }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<h3 class="page-title">Users</h3>
+<p class="page-subtitle">View trekkers and blacklist accounts if needed.</p>
+
+<form method="GET" class="row g-2 filter-box">
+    <div class="col-md-5">
+        <input type="text" name="search" class="form-control" value="{{ search }}" placeholder="Search user name or email">
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+    </div>
+    <div class="col-md-2">
+        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-outline-secondary w-100">Clear</a>
+    </div>
+</form>
+
+<div class="table-box">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Contact</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.contact_details or '-' }}</td>
+                <td><span class="status-label status-{{ user.status|lower }}">{{ user.status }}</span></td>
+                <td>
+                    <form method="POST" action="{{ url_for('admin.update_user_status', user_id=user.id) }}">
+                        {% if user.status == 'Active' %}
+                            <button type="submit" name="action" value="deactivate" class="btn btn-sm btn-outline-danger">Blacklist</button>
+                        {% else %}
+                            <button type="submit" name="action" value="activate" class="btn btn-sm btn-outline-success">Activate</button>
+                        {% endif %}
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center text-muted">No users found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

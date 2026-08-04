@@ -1,39 +1,63 @@
 {% extends "admin/admin_layout.html" %}
 {% block title %}Admin Dashboard{% endblock %}
 {% block admin_content %}
-<h4>Dashboard</h4>
-<div class="row mb-4">
+<h3 class="page-title">Dashboard</h3>
+<p class="page-subtitle">Quick view of TrailMate records.</p>
+
+<div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <h6>Total Treks</h6>
-                <h2>{{ total_treks }}</h2>
-            </div>
+        <div class="stat-box">
+            <h6>Total Treks</h6>
+            <h2>{{ total_treks }}</h2>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <h6>Total Users</h6>
-                <h2>{{ total_users }}</h2>
-            </div>
+        <div class="stat-box">
+            <h6>Total Users</h6>
+            <h2>{{ total_users }}</h2>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <h6>Total Staff</h6>
-                <h2>{{ total_staff }}</h2>
-            </div>
+        <div class="stat-box">
+            <h6>Total Staff</h6>
+            <h2>{{ total_staff }}</h2>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <h6>Total Bookings</h6>
-                <h2>{{ total_bookings }}</h2>
-            </div>
+        <div class="stat-box">
+            <h6>Total Bookings</h6>
+            <h2>{{ total_bookings }}</h2>
         </div>
     </div>
+</div>
+
+<h5 class="mb-3">Recent Bookings</h5>
+<div class="table-box">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>User</th>
+                <th>Trek</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in recent_bookings %}
+            <tr>
+                <td>{{ booking.booking_id }}</td>
+                <td>{{ booking.user.name }}</td>
+                <td>{{ booking.trek.trek_name }}</td>
+                <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+                <td><span class="status-label status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center text-muted">No bookings yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

@@ -1,34 +1,46 @@
 {% extends "staff/staff_layout.html" %}
 {% block title %}Assigned Treks{% endblock %}
 {% block staff_content %}
-<h4>My Assigned Treks</h4>
-<table class="table table-bordered bg-white shadow-sm">
-    <thead>
-        <tr>
-            <th>Trek Name</th>
-            <th>Location</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for trek in treks %}
-        <tr>
-            <td>{{ trek.trek_name }}</td>
-            <td>{{ trek.location }}</td>
-            <td>{{ trek.status }}</td>
-            <td>
-                <form method="POST" action="{{ url_for('staff.update_status', trek_id=trek.trek_id) }}">
-                    <select name="status" class="form-select form-select-sm d-inline w-auto">
-                        <option value="Upcoming" {% if trek.status == 'Upcoming' %}selected{% endif %}>Upcoming</option>
-                        <option value="Ongoing" {% if trek.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
-                        <option value="Completed" {% if trek.status == 'Completed' %}selected{% endif %}>Completed</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<h3 class="page-title">My Assigned Treks</h3>
+<p class="page-subtitle">Update slots and trek status from here.</p>
+
+<div class="table-box">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Trek Name</th>
+                <th>Location</th>
+                <th>Slots</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trek in treks %}
+            <tr>
+                <td>{{ trek.trek_name }}</td>
+                <td>{{ trek.location }}</td>
+                <td>{{ trek.available_slots }}</td>
+                <td><span class="status-label status-{{ trek.status|lower }}">{{ trek.status }}</span></td>
+                <td>
+                    <form method="POST" action="{{ url_for('staff.update_status', trek_id=trek.trek_id) }}">
+                        <input type="number" name="available_slots" value="{{ trek.available_slots }}" min="0" class="form-control form-control-sm d-inline w-auto">
+                        <select name="status" class="form-select form-select-sm d-inline w-auto">
+                            <option value="Upcoming" {% if trek.status == 'Upcoming' %}selected{% endif %}>Upcoming</option>
+                            <option value="Ongoing" {% if trek.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+                            <option value="Completed" {% if trek.status == 'Completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                        <a href="{{ url_for('staff.participants', trek_id=trek.trek_id) }}" class="btn btn-outline-secondary btn-sm">Participants</a>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center text-muted">No treks assigned yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

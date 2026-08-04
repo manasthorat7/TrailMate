@@ -1,15 +1,17 @@
 {% extends "staff/staff_layout.html" %}
 {% block title %}Staff Dashboard{% endblock %}
 {% block staff_content %}
-<h4>My Dashboard</h4>
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <h6>Assigned Treks</h6>
-                <h2>{{ total_assigned }}</h2>
-            </div>
+<h3 class="page-title">My Dashboard</h3>
+<p class="page-subtitle">Treks assigned by the admin.</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-box">
+            <h6>Assigned Treks</h6>
+            <h2>{{ total_assigned }}</h2>
         </div>
     </div>
 </div>
+
+<a href="{{ url_for('staff.assigned_treks') }}" class="btn btn-primary">View My Treks</a>
 {% endblock %}

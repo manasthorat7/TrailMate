@@ -1,23 +1,41 @@
 {% extends "user/user_layout.html" %}
 {% block title %}My Bookings{% endblock %}
 {% block user_content %}
-<h4>My Bookings</h4>
-<table class="table table-bordered bg-white shadow-sm">
-    <thead>
-        <tr>
-            <th>Trek Name</th>
-            <th>Booking Date</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for booking in bookings %}
-        <tr>
-            <td>{{ booking.trek.trek_name }}</td>
-            <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
-            <td>{{ booking.status }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<h3 class="page-title">My Bookings</h3>
+<p class="page-subtitle">Check your current and cancelled bookings.</p>
+
+<div class="table-box">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Trek Name</th>
+                <th>Booking Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.trek.trek_name }}</td>
+                <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+                <td><span class="status-label status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
+                <td>
+                    {% if booking.status == 'Confirmed' and booking.trek.status != 'Completed' %}
+                    <form method="POST" action="{{ url_for('user.cancel_booking', booking_id=booking.booking_id) }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                    </form>
+                    {% else %}
+                        <span class="text-muted">No action</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">No bookings yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

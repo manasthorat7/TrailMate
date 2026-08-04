@@ -24,8 +24,8 @@ def login():
             if user.status == 'Pending':
                 flash('Your staff account is pending Admin approval.', 'warning')
                 return redirect(url_for('auth.login'))
-            if user.status == 'Inactive':
-                flash('Your account has been deactivated.', 'danger')
+            if user.status in ['Inactive', 'Rejected']:
+                flash('Your account has been deactivated or rejected.', 'danger')
                 return redirect(url_for('auth.login'))
             login_user(user)
             return redirect_based_on_role(user.role)
@@ -44,9 +44,12 @@ def register():
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
-        password = request.form.get('password')
+        password = request.form.get('password') or ''
         role = request.form.get('role')  # 'user' or 'staff'
         contact_details = request.form.get('contact_details')
+        if role not in ['user', 'staff']:
+            flash('Invalid role selected.', 'danger')
+            return redirect(url_for('auth.register'))
         if len(password) < 6:
             flash('Error: Password must be at least 6 characters long.', 'danger')
             return redirect(url_for('auth.register'))

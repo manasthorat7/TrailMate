@@ -1,25 +1,35 @@
 {% extends "admin/admin_layout.html" %}
 {% block title %}Bookings{% endblock %}
 {% block admin_content %}
-<h4>Bookings</h4>
-<table class="table table-bordered bg-white shadow-sm">
-    <thead>
-        <tr>
-            <th>Booking ID</th>
-            <th>Trek Name</th>
-            <th>User</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for booking in bookings %}
-        <tr>
-            <td>{{ booking.booking_id }}</td>
-            <td>{{ booking.trek.trek_name }}</td>
-            <td>{{ booking.user.name }}</td>
-            <td>{{ booking.status }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<h3 class="page-title">Bookings</h3>
+<p class="page-subtitle">All trek bookings made by users.</p>
+
+<div class="table-box">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Trek Name</th>
+                <th>User</th>
+                <th>Booking Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.booking_id }}</td>
+                <td>{{ booking.trek.trek_name }}</td>
+                <td>{{ booking.user.name }}</td>
+                <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+                <td><span class="status-label status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center text-muted">No bookings found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

@@ -1,21 +1,31 @@
 {% extends "user/user_layout.html" %}
 {% block title %}History{% endblock %}
 {% block user_content %}
-<h4>Trekking History</h4>
-<table class="table table-bordered bg-white shadow-sm">
-    <thead>
-        <tr>
-            <th>Trek Name</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for booking in history %}
-        <tr>
-            <td>{{ booking.trek.trek_name }}</td>
-            <td>{{ booking.trek.status }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<h3 class="page-title">Trekking History</h3>
+<p class="page-subtitle">Completed treks will appear here.</p>
+
+<div class="table-box">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Trek Name</th>
+                <th>Trek Dates</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in history %}
+            <tr>
+                <td>{{ booking.trek.trek_name }}</td>
+                <td>{{ booking.trek.start_date }} to {{ booking.trek.end_date }}</td>
+                <td><span class="status-label status-{{ booking.trek.status|lower }}">{{ booking.trek.status }}</span></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" class="text-center text-muted">No completed treks yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

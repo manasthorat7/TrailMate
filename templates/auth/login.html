@@ -1,21 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Login - TrailMate{% endblock %}
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5">
-        <div class="card shadow-sm">
-            <div class="card-header bg-white"><h4 class="mb-0">Trekking Management Application</h4></div>
-            <div class="card-body p-4 text-center">
-                <h3 class="mb-4">Login</h3>
+<div class="auth-wrapper">
+    <div class="w-100" style="max-width: 400px;">
+        <div class="text-center mb-4">
+            <h2 class="text-forest fw-bold">TrailMate</h2>
+            <p class="text-muted">Trekking Management Application</p>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="mb-4 text-center">Login</h4>
                 <form method="POST">
                     <div class="mb-3">
-                        <input type="email" class="form-control" name="email" placeholder="Email" required>
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" placeholder="Email Address" required>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
+                        <label class="form-label">Password</label>
                         <input type="password" class="form-control" name="password" placeholder="Password" required>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
-                    <p class="text-muted">Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
+                    <button type="submit" class="btn btn-forest w-100 mb-3">Sign In</button>
+                    <p class="text-center text-muted mb-0">New here? <a href="{{ url_for('auth.register') }}" class="text-forest text-decoration-none fw-bold">Register</a></p>
                 </form>
             </div>
         </div>

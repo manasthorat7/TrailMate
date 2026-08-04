@@ -43,10 +43,22 @@ def update_status(trek_id):
         return redirect(url_for('staff.assigned_treks'))
 
     new_status = request.form.get('status')
+    slots = request.form.get('available_slots')
+    try:
+        slots = int(slots)
+    except (TypeError, ValueError):
+        flash('Please enter a valid number of slots.', 'danger')
+        return redirect(url_for('staff.assigned_treks'))
+
+    if slots < 0:
+        flash('Available slots cannot be negative.', 'danger')
+        return redirect(url_for('staff.assigned_treks'))
+
     if new_status in ['Upcoming', 'Ongoing', 'Completed']:
         trek.status = new_status
+        trek.available_slots = slots
         db.session.commit()
-        flash(f'Trek status updated to {new_status}.', 'success')
+        flash('Trek details updated.', 'success')
 
     return redirect(url_for('staff.assigned_treks'))
 
