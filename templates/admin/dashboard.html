@@ -1,0 +1,81 @@
+{% extends "admin/admin_layout.html" %}
+
+{% block admin_content %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <h4 class="text-forest mb-0">Admin Dashboard</h4>
+        <p class="text-muted">Welcome back, {{ current_user.name }}</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-forest shadow-sm text-center">
+            <div class="card-body">
+                <h2 class="fw-bold">{{ total_treks }}</h2>
+                <span>Total Treks</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-success text-success shadow-sm text-center">
+            <div class="card-body">
+                <h2 class="fw-bold">{{ total_staff }}</h2>
+                <span>Staff Members</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-primary text-primary shadow-sm text-center">
+            <div class="card-body">
+                <h2 class="fw-bold">{{ total_users }}</h2>
+                <span>Total Trekkers</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-warning text-warning shadow-sm text-center">
+            <div class="card-body">
+                <h2 class="fw-bold">{{ total_bookings }}</h2>
+                <span>Total Bookings</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mt-2">
+    <div class="card-header bg-white">
+        <h5 class="mb-0 text-forest">Recent Bookings</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>User</th>
+                        <th>Trek</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in recent_bookings %}
+                    <tr>
+                        <td>{{ booking.booking_id }}</td>
+                        <td>{{ booking.user.name }}</td>
+                        <td>{{ booking.trek.trek_name }}</td>
+                        <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+                        <td><span class="badge bg-success">{{ booking.status }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No bookings yet.</td>
+                    </tr>
+                    {% end for %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% end block %}

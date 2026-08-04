@@ -38,7 +38,10 @@ def create_app():
         
     # Register Blueprints
     from routes.auth import auth_bp
+    from routes.admin import admin_bp
+    
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
 
     
     # Programmatically create the database and default Admin user
