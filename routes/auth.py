@@ -5,9 +5,11 @@ from models import User
 from database import db
 auth_bp = Blueprint('auth', __name__)
 
+
 @auth_bp.route('/', methods=['GET'])
 def index():
     return redirect(url_for('auth.login'))
+
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -27,11 +29,12 @@ def login():
                 return redirect(url_for('auth.login'))
             login_user(user)
             return redirect_based_on_role(user.role)
-            
+
         else:
             flash('Invalid email or password. Please try again.', 'danger')
 
     return render_template('auth/login.html')
+
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -42,7 +45,7 @@ def register():
         name = request.form.get('name')
         email = request.form.get('email')
         password = request.form.get('password')
-        role = request.form.get('role') # 'user' or 'staff'
+        role = request.form.get('role')  # 'user' or 'staff'
         contact_details = request.form.get('contact_details')
         if len(password) < 6:
             flash('Error: Password must be at least 6 characters long.', 'danger')
@@ -60,27 +63,30 @@ def register():
             contact_details=contact_details,
             status=initial_status
         )
-        
+
         db.session.add(new_user)
         db.session.commit()
-        
+
         if role == 'staff':
             flash('Staff registration successful! Please wait for Admin approval to login.', 'success')
         else:
             flash('Registration successful! You can now login.', 'success')
-            
+
         return redirect(url_for('auth.login'))
 
     return render_template('auth/register.html')
+
 
 @auth_bp.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('auth.login'))
+
+
 def redirect_based_on_role(role):
     if role == 'admin':
-        return redirect('/admin/dashboard') # We will use url_for when admin routes are built
+        return redirect('/admin/dashboard')  # We will use url_for when admin routes are built
     elif role == 'staff':
         return redirect('/staff/dashboard')
     else:

@@ -6,6 +6,8 @@ from database import db
 from datetime import datetime
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -14,6 +16,7 @@ def admin_required(f):
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated_function
+
 
 @admin_bp.route('/dashboard')
 @login_required
@@ -24,13 +27,14 @@ def dashboard():
     total_staff = User.query.filter_by(role='staff', status='Active').count()
     total_bookings = Booking.query.count()
     recent_bookings = Booking.query.order_by(Booking.booking_date.desc()).limit(5).all()
-    
-    return render_template('admin/dashboard.html', 
-                           total_treks=total_treks, 
-                           total_users=total_users, 
-                           total_staff=total_staff, 
+
+    return render_template('admin/dashboard.html',
+                           total_treks=total_treks,
+                           total_users=total_users,
+                           total_staff=total_staff,
                            total_bookings=total_bookings,
                            recent_bookings=recent_bookings)
+
 
 @admin_bp.route('/treks')
 @login_required
@@ -38,6 +42,7 @@ def dashboard():
 def manage_treks():
     treks = Trek.query.all()
     return render_template('admin/treks.html', treks=treks)
+
 
 @admin_bp.route('/treks/add', methods=['GET', 'POST'])
 @login_required
@@ -61,7 +66,7 @@ def add_trek():
         if slots_int <= 0:
             flash('Error: Available slots must be at least 1.', 'danger')
             return redirect(url_for('admin.add_trek'))
-        
+
         new_trek = Trek(
             trek_name=trek_name,
             location=location,
@@ -72,7 +77,7 @@ def add_trek():
             start_date=start_date,
             end_date=end_date
         )
-        
+
         db.session.add(new_trek)
         db.session.commit()
         flash('New trek successfully added.', 'success')
@@ -80,26 +85,28 @@ def add_trek():
     active_staff = User.query.filter_by(role='staff', status='Active').all()
     return render_template('admin/add_trek.html', active_staff=active_staff)
 
+
 @admin_bp.route('/staff', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def manage_staff():
     if request.method == 'POST':
         staff_id = request.form.get('staff_id')
-        action = request.form.get('action') # 'approve' or 'reject'
-        
+        action = request.form.get('action')  # 'approve' or 'reject'
+
         staff_member = User.query.get(int(staff_id))
         if staff_member and staff_member.role == 'staff':
             if action == 'approve':
                 staff_member.status = 'Active'
                 flash(f'Staff account for {staff_member.name} approved.', 'success')
             elif action == 'reject':
-                staff_member.status = 'Rejected' # Or we could delete it
+                staff_member.status = 'Rejected'  # Or we could delete it
                 flash(f'Staff account for {staff_member.name} rejected.', 'danger')
             db.session.commit()
     pending_staff = User.query.filter_by(role='staff', status='Pending').all()
     active_staff = User.query.filter_by(role='staff', status='Active').all()
     return render_template('admin/staff.html', pending_staff=pending_staff, active_staff=active_staff)
+
 
 @admin_bp.route('/users')
 @login_required
@@ -107,6 +114,7 @@ def manage_staff():
 def manage_users():
     users = User.query.filter_by(role='user').all()
     return render_template('admin/users.html', users=users)
+
 
 @admin_bp.route('/bookings')
 @login_required
