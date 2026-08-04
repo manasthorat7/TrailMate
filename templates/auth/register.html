@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Register - TrailMate{% end block %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-5">
+                <h3 class="text-center mb-4 text-forest fw-bold">Create an Account</h3>
+                
+                <form method="POST" action="{{ url_for('auth.register') }}">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
+                        <label for="name">Full Name</label>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                        <label for="email">Email address</label>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                        <label for="password">Password</label>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="contact_details" name="contact_details" placeholder="Phone Number" required>
+                        <label for="contact_details">Contact Details (Phone)</label>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label text-muted">I am registering as a:</label>
+                        <select class="form-select" name="role" required>
+                            <option value="user" selected>Trekker (User)</option>
+                            <option value="staff">Trek Guide (Staff)</option>
+                        </select>
+                        <small class="text-muted d-block mt-1">Note: Staff accounts require Admin approval before login.</small>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button class="btn btn-forest btn-lg" type="submit">Sign Up</button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <p class="text-muted">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-forest fw-bold text-decoration-none">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% end block %}

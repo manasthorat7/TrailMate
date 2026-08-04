@@ -23,7 +23,23 @@ def create_app():
     # Initialize the database with this specific app instance
     db.init_app(app)
     
-    # We will register our blueprints (routes) here later
+    # Initialize Flask-Login
+    from flask_login import LoginManager
+    from models import User
+    
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login' # Redirect here if not logged in
+    login_manager.login_message_category = 'warning'
+    login_manager.init_app(app)
+    
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+        
+    # Register Blueprints
+    from routes.auth import auth_bp
+    app.register_blueprint(auth_bp)
+
     
     # Programmatically create the database and default Admin user
     from models import User, Trek, Booking # Import here to ensure db knows about them
