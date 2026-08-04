@@ -14,8 +14,12 @@ def create_app():
     
     # Configure the SQLite database location
     # This points to instance/trekking.db
-    basedir = os.path.abspath(os.path.dirname(__name__))
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'trekking.db')
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    instance_path = os.path.join(basedir, 'instance')
+    if not os.path.exists(instance_path):
+        os.makedirs(instance_path)
+        
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(instance_path, 'trekking.db')
     
     # Disable modification tracking to save resources
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
