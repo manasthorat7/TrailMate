@@ -61,6 +61,12 @@ def register():
         role = request.form.get('role') # 'user' or 'staff'
         contact_details = request.form.get('contact_details')
         
+        # --- Validation Logic ---
+        if len(password) < 6:
+            flash('Error: Password must be at least 6 characters long.', 'danger')
+            return redirect(url_for('auth.register'))
+        # ------------------------
+        
         # Check if email is already taken
         user_exists = User.query.filter_by(email=email).first()
         if user_exists:

@@ -62,12 +62,25 @@ def add_trek():
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
         end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
         
+        # --- Validation Logic ---
+        # 1. Ensure dates are logical
+        if start_date > end_date:
+            flash('Error: The End Date cannot be earlier than the Start Date.', 'danger')
+            return redirect(url_for('admin.add_trek'))
+            
+        # 2. Ensure slots are valid
+        slots_int = int(available_slots)
+        if slots_int <= 0:
+            flash('Error: Available slots must be at least 1.', 'danger')
+            return redirect(url_for('admin.add_trek'))
+        # ------------------------
+        
         new_trek = Trek(
             trek_name=trek_name,
             location=location,
             difficulty=difficulty,
             duration=duration,
-            available_slots=int(available_slots),
+            available_slots=slots_int,
             assigned_staff_id=assigned_staff_id,
             start_date=start_date,
             end_date=end_date
