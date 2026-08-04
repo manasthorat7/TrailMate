@@ -1,18 +1,21 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="row">
-    <!-- Staff Sidebar -->
-    <div class="col-md-3 mb-4">
-        <div class="list-group shadow-sm">
-            <a href="{{ url_for('staff.dashboard') }}" class="list-group-item list-group-item-action text-forest fw-bold">📊 My Dashboard</a>
-            <a href="{{ url_for('staff.assigned_treks') }}" class="list-group-item list-group-item-action">🎒 My Assigned Treks</a>
-        </div>
-    </div>
-    
-    <!-- Main Staff Content Area -->
-    <div class="col-md-9">
-        {% block staff_content %}{% end block %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4>Trekking Management Application</h4>
+    <div>
+        <span class="me-3">👤 {{ current_user.name }} (Staff)</span>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
     </div>
 </div>
-{% end block %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="list-group">
+            <a href="{{ url_for('staff.dashboard') }}" class="list-group-item list-group-item-action">Dashboard</a>
+            <a href="{{ url_for('staff.assigned_treks') }}" class="list-group-item list-group-item-action">My Treks</a>
+        </div>
+    </div>
+    <div class="col-md-9">
+        {% block staff_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

@@ -1,43 +1,34 @@
 {% extends "staff/staff_layout.html" %}
-
+{% block title %}Assigned Treks{% endblock %}
 {% block staff_content %}
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-white">
-        <h5 class="text-forest mb-0">My Assigned Treks</h5>
-    </div>
-    <div class="card-body">
-        {% if treks %}
-            {% for trek in treks %}
-            <div class="card mb-3 border-success">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title text-forest mb-0">{{ trek.trek_name }}</h5>
-                        <span class="badge {% if trek.status == 'Upcoming' %}bg-warning{% elif trek.status == 'Ongoing' %}bg-primary{% else %}bg-success{% endif %}">
-                            {{ trek.status }}
-                        </span>
-                    </div>
-                    <p class="card-text text-muted mb-3">
-                        <small>📍 {{ trek.location }} | 🗓️ {{ trek.start_date.strftime('%Y-%m-%d') }} to {{ trek.end_date.strftime('%Y-%m-%d') }}</small>
-                    </p>
-                    
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a href="{{ url_for('staff.participants', trek_id=trek.trek_id) }}" class="btn btn-outline-forest btn-sm">👥 View Participants</a>
-                        
-                        <form method="POST" action="{{ url_for('staff.update_trek_status', trek_id=trek.trek_id) }}" class="d-inline-flex align-items-center">
-                            <select name="status" class="form-select form-select-sm me-2" style="width: auto;">
-                                <option value="Upcoming" {% if trek.status == 'Upcoming' %}selected{% endif %}>Upcoming</option>
-                                <option value="Ongoing" {% if trek.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
-                                <option value="Completed" {% if trek.status == 'Completed' %}selected{% endif %}>Completed</option>
-                            </select>
-                            <button type="submit" class="btn btn-forest btn-sm">Update Status</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            {% end for %}
-        {% else %}
-            <p class="text-muted text-center">You have no assigned treks at the moment.</p>
-        {% endif %}
-    </div>
-</div>
-{% end block %}
+<h4>My Assigned Treks</h4>
+<table class="table table-bordered bg-white shadow-sm">
+    <thead>
+        <tr>
+            <th>Trek Name</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trek in treks %}
+        <tr>
+            <td>{{ trek.trek_name }}</td>
+            <td>{{ trek.location }}</td>
+            <td>{{ trek.status }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('staff.update_status', trek_id=trek.trek_id) }}">
+                    <select name="status" class="form-select form-select-sm d-inline w-auto">
+                        <option value="Upcoming" {% if trek.status == 'Upcoming' %}selected{% endif %}>Upcoming</option>
+                        <option value="Ongoing" {% if trek.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+                        <option value="Completed" {% if trek.status == 'Completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

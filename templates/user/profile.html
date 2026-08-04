@@ -1,0 +1,24 @@
+{% extends "user/user_layout.html" %}
+{% block title %}Profile{% endblock %}
+{% block user_content %}
+<h4>Profile</h4>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label>Name</label>
+                <input type="text" class="form-control" name="name" value="{{ current_user.name }}" required>
+            </div>
+            <div class="mb-3">
+                <label>Email</label>
+                <input type="email" class="form-control" name="email" value="{{ current_user.email }}" readonly>
+            </div>
+            <div class="mb-3">
+                <label>Contact Details</label>
+                <input type="text" class="form-control" name="contact_details" value="{{ current_user.contact_details }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

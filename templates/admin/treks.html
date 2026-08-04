@@ -1,0 +1,32 @@
+{% extends "admin/admin_layout.html" %}
+{% block title %}Manage Treks{% endblock %}
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>Treks</h4>
+    <a href="{{ url_for('admin.add_trek') }}" class="btn btn-primary">+ Add New Trek</a>
+</div>
+<table class="table table-bordered bg-white shadow-sm">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Trek Name</th>
+            <th>Location</th>
+            <th>Difficulty</th>
+            <th>Slots</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trek in treks %}
+        <tr>
+            <td>{{ trek.trek_id }}</td>
+            <td>{{ trek.trek_name }}</td>
+            <td>{{ trek.location }}</td>
+            <td>{{ trek.difficulty }}</td>
+            <td>{{ trek.available_slots }}</td>
+            <td>{{ trek.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

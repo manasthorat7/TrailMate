@@ -1,0 +1,15 @@
+{% extends "staff/staff_layout.html" %}
+{% block title %}Staff Dashboard{% endblock %}
+{% block staff_content %}
+<h4>My Dashboard</h4>
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6>Assigned Treks</h6>
+                <h2>{{ total_assigned }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

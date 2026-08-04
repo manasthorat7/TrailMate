@@ -1,0 +1,23 @@
+{% extends "admin/admin_layout.html" %}
+{% block title %}Users{% endblock %}
+{% block admin_content %}
+<h4>Users</h4>
+<table class="table table-bordered bg-white shadow-sm">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Contact</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.contact_details }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

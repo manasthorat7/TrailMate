@@ -1,22 +1,24 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="row">
-    <!-- Admin Sidebar -->
-    <div class="col-md-3 mb-4">
-        <div class="list-group shadow-sm">
-            <a href="{{ url_for('admin.dashboard') }}" class="list-group-item list-group-item-action text-forest fw-bold">📊 Dashboard</a>
-            <a href="{{ url_for('admin.manage_treks') }}" class="list-group-item list-group-item-action">⛰️ Manage Treks</a>
-            <a href="{{ url_for('admin.add_trek') }}" class="list-group-item list-group-item-action">➕ Add New Trek</a>
-            <a href="{{ url_for('admin.manage_staff') }}" class="list-group-item list-group-item-action">🧑‍🏫 Manage Staff</a>
-            <a href="{{ url_for('admin.manage_users') }}" class="list-group-item list-group-item-action">👥 View Trekkers</a>
-            <a href="{{ url_for('admin.view_bookings') }}" class="list-group-item list-group-item-action">📅 View Bookings</a>
-        </div>
-    </div>
-    
-    <!-- Main Admin Content Area -->
-    <div class="col-md-9">
-        {% block admin_content %}{% end block %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4>Trekking Management Application</h4>
+    <div>
+        <span class="me-3">👤 Admin</span>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
     </div>
 </div>
-{% end block %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="list-group">
+            <a href="{{ url_for('admin.dashboard') }}" class="list-group-item list-group-item-action">Dashboard</a>
+            <a href="{{ url_for('admin.manage_treks') }}" class="list-group-item list-group-item-action">Treks</a>
+            <a href="{{ url_for('admin.manage_staff') }}" class="list-group-item list-group-item-action">Staff</a>
+            <a href="{{ url_for('admin.manage_users') }}" class="list-group-item list-group-item-action">Users</a>
+            <a href="{{ url_for('admin.view_bookings') }}" class="list-group-item list-group-item-action">Bookings</a>
+        </div>
+    </div>
+    <div class="col-md-9">
+        {% block admin_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

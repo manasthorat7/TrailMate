@@ -1,0 +1,23 @@
+{% extends "user/user_layout.html" %}
+{% block title %}My Bookings{% endblock %}
+{% block user_content %}
+<h4>My Bookings</h4>
+<table class="table table-bordered bg-white shadow-sm">
+    <thead>
+        <tr>
+            <th>Trek Name</th>
+            <th>Booking Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.trek.trek_name }}</td>
+            <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ booking.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

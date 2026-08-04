@@ -1,0 +1,21 @@
+{% extends "user/user_layout.html" %}
+{% block title %}History{% endblock %}
+{% block user_content %}
+<h4>Trekking History</h4>
+<table class="table table-bordered bg-white shadow-sm">
+    <thead>
+        <tr>
+            <th>Trek Name</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in history %}
+        <tr>
+            <td>{{ booking.trek.trek_name }}</td>
+            <td>{{ booking.trek.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
