@@ -19,7 +19,7 @@
             <td>{{ staff.status }}</td>
             <td>
                 <form method="POST" class="d-inline">
-                    <input type="hidden" name="staff_id" value="{{ staff.user_id }}">
+                    <input type="hidden" name="staff_id" value="{{ staff.id }}">
                     <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">Approve</button>
                     <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
                 </form>
