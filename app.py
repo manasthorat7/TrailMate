@@ -25,6 +25,27 @@ def create_app():
     
     # We will register our blueprints (routes) here later
     
+    # Programmatically create the database and default Admin user
+    from models import User, Trek, Booking # Import here to ensure db knows about them
+    
+    with app.app_context():
+        db.create_all() # Creates tables if they do not exist
+        
+        # Check if an admin already exists, if not, create the pre-existing admin
+        admin = User.query.filter_by(role='admin').first()
+        if not admin:
+            from werkzeug.security import generate_password_hash
+            default_admin = User(
+                name='System Admin',
+                email='admin@trailmate.com',
+                password=generate_password_hash('admin123'), # Securely hashed
+                role='admin',
+                status='Active'
+            )
+            db.session.add(default_admin)
+            db.session.commit()
+            print("Default Admin created successfully!")
+            
     return app
 
 if __name__ == '__main__':
