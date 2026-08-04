@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body p-4">
+                <a href="{{ url_for('user.dashboard') }}" class="text-decoration-none text-muted mb-3 d-inline-block">&larr; Back to Treks</a>
+                <h2 class="text-forest fw-bold mb-3">{{ trek.trek_name }}</h2>
+                
+                <div class="row mb-4">
+                    <div class="col-sm-6 mb-2">
+                        <strong>📍 Location:</strong> <span class="text-muted">{{ trek.location }}</span>
+                    </div>
+                    <div class="col-sm-6 mb-2">
+                        <strong>📊 Difficulty:</strong> <span class="text-muted">{{ trek.difficulty }}</span>
+                    </div>
+                    <div class="col-sm-6 mb-2">
+                        <strong>⏱️ Duration:</strong> <span class="text-muted">{{ trek.duration }}</span>
+                    </div>
+                    <div class="col-sm-6 mb-2">
+                        <strong>📅 Dates:</strong> <span class="text-muted">{{ trek.start_date.strftime('%Y-%m-%d') }} to {{ trek.end_date.strftime('%Y-%m-%d') }}</span>
+                    </div>
+                </div>
+                
+                <h5 class="fw-bold">Description</h5>
+                <p class="text-muted">
+                    Join us for an unforgettable experience at {{ trek.trek_name }}. This {{ trek.difficulty|lower }} trek spans {{ trek.duration }} through the beautiful landscapes of {{ trek.location }}.
+                </p>
+                <p class="text-muted">
+                    <small>Guided by our professional staff. Prepare for a great adventure!</small>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm border-success">
+            <div class="card-header bg-success text-white text-center py-3">
+                <h4 class="mb-0">Booking Details</h4>
+            </div>
+            <div class="card-body p-4 text-center">
+                <h1 class="display-4 fw-bold text-forest mb-0">{{ trek.available_slots }}</h1>
+                <p class="text-muted mb-4">Slots Available</p>
+                
+                {% if has_booked %}
+                    <div class="alert alert-info">You have already booked this trek.</div>
+                    <a href="{{ url_for('user.my_bookings') }}" class="btn btn-secondary w-100 btn-lg">View My Bookings</a>
+                {% elif trek.status != 'Upcoming' %}
+                    <div class="alert alert-warning">This trek is no longer accepting bookings.</div>
+                    <button class="btn btn-secondary w-100 btn-lg" disabled>Closed</button>
+                {% elif trek.available_slots <= 0 %}
+                    <div class="alert alert-danger">This trek is fully booked.</div>
+                    <button class="btn btn-secondary w-100 btn-lg" disabled>Sold Out</button>
+                {% else %}
+                    <form method="POST" action="{{ url_for('user.book_trek', trek_id=trek.trek_id) }}">
+                        <button type="submit" class="btn btn-success w-100 btn-lg shadow-sm">Book Now</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% end block %}

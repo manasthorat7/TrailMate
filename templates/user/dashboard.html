@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h3 class="text-forest fw-bold">Available Treks</h3>
+        <p class="text-muted">Find your next adventure from our curated list of mountain treks.</p>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('user.my_bookings') }}" class="btn btn-outline-forest">My Bookings</a>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for trek in treks %}
+    <div class="col">
+        <div class="card h-100 shadow-sm border-0">
+            <!-- Placeholder for a trek image, represented by a colored box with an icon for now -->
+            <div class="card-img-top bg-light text-center py-5 border-bottom">
+                <span style="font-size: 3rem;">⛰️</span>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-forest fw-bold">{{ trek.trek_name }}</h5>
+                <p class="card-text text-muted mb-2">📍 {{ trek.location }}</p>
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge {% if trek.difficulty == 'Hard' %}bg-danger{% elif trek.difficulty == 'Moderate' %}bg-warning{% else %}bg-success{% endif %}">
+                        {{ trek.difficulty }}
+                    </span>
+                    <span class="small text-muted">⏱️ {{ trek.duration }}</span>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    {% if trek.available_slots > 0 and trek.status == 'Upcoming' %}
+                        <span class="text-success fw-bold">{{ trek.available_slots }} slots left</span>
+                    {% else %}
+                        <span class="text-danger fw-bold">Fully Booked / Closed</span>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('user.trek_details', trek_id=trek.trek_id) }}" class="btn btn-sm btn-outline-forest">View Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <p class="text-muted">No treks are currently available.</p>
+    </div>
+    {% end for %}
+</div>
+{% end block %}
