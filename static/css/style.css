@@ -1,0 +1,65 @@
+/* TrailMate Custom Theme - Mountain Inspired */
+
+:root {
+    --forest-green: #2d5a27;
+    --forest-green-dark: #1e3d1a;
+    --light-grey: #f8f9fa;
+    --mountain-slate: #4a5568;
+}
+
+body {
+    background-color: var(--light-grey);
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--mountain-slate);
+}
+
+/* Custom Forest Colors */
+.text-forest {
+    color: var(--forest-green) !important;
+}
+
+.bg-forest {
+    background-color: var(--forest-green) !important;
+    color: white !important;
+}
+
+/* Custom Buttons */
+.btn-forest {
+    background-color: var(--forest-green);
+    color: white;
+    border: none;
+    transition: all 0.3s ease; /* Smooth hover transition */
+}
+
+.btn-forest:hover {
+    background-color: var(--forest-green-dark);
+    color: white;
+    transform: translateY(-2px); /* Micro-animation */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-outline-forest {
+    color: var(--forest-green);
+    border-color: var(--forest-green);
+    transition: all 0.3s ease;
+}
+
+.btn-outline-forest:hover {
+    background-color: var(--forest-green);
+    color: white;
+}
+
+/* Card Hover Effects */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Navbar styling */
+.navbar-brand {
+    letter-spacing: 1px;
+}
