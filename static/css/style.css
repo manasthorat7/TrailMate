@@ -1,214 +1,96 @@
 :root {
-    --green: #245c45;
-    --dark-green: #173c2f;
-    --page-bg: #f4f6f5;
-    --text-dark: #263238;
-    --text-light: #667085;
-    --line: #d9e0dc;
+    --forest-green: #2c5e3b;
+    --forest-green-dark: #1f4229;
+    --mountain-blue: #3b5b78;
+    --mountain-blue-dark: #2a4157;
+    --sunrise-orange: #e67e22;
+    --sunrise-orange-dark: #cc701e;
+    --bg-light: #f7f9f8;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --line: #e2e8f0;
 }
 
 body {
     margin: 0;
-    background-color: var(--page-bg);
     font-family: "Segoe UI", Arial, sans-serif;
     color: var(--text-dark);
-}
-
-.text-forest {
-    color: var(--green) !important;
-}
-
-.bg-forest {
-    background-color: var(--green) !important;
-    color: white !important;
-}
-
-.btn-forest {
-    background-color: var(--green);
-    color: white;
-    border: 1px solid var(--green);
-}
-
-.btn-forest:hover {
-    background-color: var(--dark-green);
-    border-color: var(--dark-green);
-    color: white;
-}
-
-.btn-outline-forest {
-    color: var(--green);
-    border-color: var(--green);
-}
-
-.btn-outline-forest:hover {
-    background-color: var(--green);
-    color: white;
-}
-
-.btn-primary {
-    background-color: var(--green);
-    border-color: var(--green);
-}
-
-.btn-primary:hover {
-    background-color: var(--dark-green);
-    border-color: var(--dark-green);
-}
-
-.card,
-.table,
-.form-control,
-.form-select,
-.btn {
-    border-radius: 6px;
-}
-
-.app-wrapper {
-    display: flex;
-    min-height: 100vh;
-}
-
-.sidebar {
-    width: 245px;
-    background-color: var(--dark-green);
-    padding: 22px 18px;
-    color: white;
-    flex-shrink: 0;
-}
-
-.sidebar .list-group-item {
-    background-color: transparent;
-    color: #e7efeb;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 0;
-    margin-bottom: 0;
-    padding: 14px 16px;
-    font-size: 15px;
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
-}
-
-.sidebar .list-group-item:last-child {
-    border-bottom: none;
-}
-
-.sidebar .list-group-item:hover,
-.sidebar .list-group-item.active {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: white;
-    border-left: 3px solid #66bb6a;
-    padding-left: 20px;
-}
-
-.content-area {
-    flex: 1;
-    padding: 28px;
-    background-color: var(--page-bg);
-    overflow-y: auto;
-}
-
-.auth-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 24px;
-    
-    /* Mountain Wallpaper Background */
-    background: url('../images/login-bg.jpg') center center / cover no-repeat;
+    background: url('../images/user-bg.jpg') center center / cover no-repeat fixed;
+    background-color: var(--bg-light); /* Fallback */
     position: relative;
+    min-height: 100vh;
 }
 
-/* Optional overlay to make the login box stand out more against the background */
-.auth-wrapper::before {
+body::before {
     content: "";
-    position: absolute;
+    position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.4);
+    z-index: -1;
 }
 
-.auth-wrapper > div {
-    position: relative;
-    z-index: 1;
+/* Base Utility Classes */
+.text-forest { color: var(--forest-green) !important; }
+.text-mountain { color: var(--mountain-blue) !important; }
+.text-sunrise { color: var(--sunrise-orange) !important; }
+
+/* Buttons */
+.btn-forest {
+    background-color: var(--forest-green);
+    color: white;
+    border: 1px solid var(--forest-green);
+}
+.btn-forest:hover {
+    background-color: var(--forest-green-dark);
+    border-color: var(--forest-green-dark);
+    color: white;
+}
+.btn-outline-forest {
+    color: var(--forest-green);
+    border-color: var(--forest-green);
+}
+.btn-outline-forest:hover {
+    background-color: var(--forest-green);
+    color: white;
+}
+.btn-mountain {
+    background-color: var(--mountain-blue);
+    color: white;
+    border: 1px solid var(--mountain-blue);
+}
+.btn-mountain:hover {
+    background-color: var(--mountain-blue-dark);
+    color: white;
+}
+.btn-sunrise {
+    background-color: var(--sunrise-orange);
+    color: white;
+    border: 1px solid var(--sunrise-orange);
+}
+.btn-sunrise:hover {
+    background-color: var(--sunrise-orange-dark);
+    color: white;
 }
 
-.page-box {
-    background-color: white;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 24px;
-    box-shadow: 0 8px 22px rgba(25, 55, 45, 0.06);
+/* Floating Island Layout */
+.nav-island {
+    background-color: var(--forest-green);
+    border-radius: 12px;
+    margin: 20px;
+    padding: 15px 25px;
+    box-shadow: 0 4px 15px rgba(44, 94, 59, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-
-.page-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 6px;
-}
-
-.page-subtitle {
-    color: var(--text-light);
-    margin-bottom: 20px;
-}
-
-.stat-box {
-    background: white;
-    border: 1px solid var(--line);
-    border-left: 4px solid var(--green);
-    border-radius: 8px;
-    padding: 18px;
-    min-height: 110px;
-}
-
-.stat-box h6 {
-    color: var(--text-light);
-    font-size: 14px;
-    margin-bottom: 10px;
-}
-
-.stat-box h2 {
-    font-size: 32px;
-    font-weight: 700;
-    margin: 0;
-}
-
-.table-box {
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    overflow-x: auto;
-    background: white;
-}
-
-.table-box .table {
-    margin-bottom: 0;
-}
-
-.table thead th {
-    background-color: #edf3f0;
-    color: #34443e;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.table td,
-.table th {
-    vertical-align: middle;
-}
-
-.filter-box {
-    background: #f8faf9;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 14px;
-    margin-bottom: 18px;
-}
-
 .simple-list {
-    border: 1px solid var(--line);
+    background: rgba(30, 30, 30, 0.45) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
-    background: #ffffff;
     padding: 14px;
+    color: white;
 }
 
 .list-line {
@@ -217,117 +99,97 @@ body {
     gap: 12px;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px solid #edf1ef;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.nav-island-links a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.nav-island-links a:hover,
+.nav-island-links a.active {
+    color: var(--sunrise-orange);
 }
 
-.list-line:last-child {
-    border-bottom: none;
+/* Floating Card for Main Content */
+.floating-card {
+    background-color: transparent;
+    margin: 0 20px 30px 20px;
+    padding: 30px;
+    color: white;
 }
-
-.status-label {
-    display: inline-block;
-    padding: 4px 9px;
-    border-radius: 20px;
-    font-size: 13px;
-    background-color: #eef2f6;
-    color: #344054;
-}
-
-.status-active,
-.status-confirmed,
-.status-upcoming {
-    background-color: #e5f6ec;
-    color: #237044;
-}
-
-.status-pending,
-.status-ongoing {
-    background-color: #fff3cd;
-    color: #8a6200;
-}
-
-.status-inactive,
-.status-rejected,
-.status-cancelled {
-    background-color: #fde8e8;
-    color: #b42318;
-}
-
-.status-completed {
-    background-color: #e8eefc;
-    color: #2f54a3;
-}
-
-@media (max-width: 800px) {
-    .app-wrapper {
-        display: block;
-    }
-
-    .sidebar {
-        width: 100%;
-    }
-
-    .content-area {
-        padding: 16px;
-    }
+.floating-card h1, .floating-card h2, .floating-card h3, .floating-card h4, .floating-card h5, .floating-card h6, .floating-card p {
+    color: white !important;
 }
 
 /* Dual-color Elegant Logo */
 .logo-trail {
-    color: #e67e22; /* Warm earthy orange to match sunset */
+    color: var(--sunrise-orange);
     font-weight: 800;
 }
 .logo-mate {
     color: #ffffff;
     font-weight: 300;
 }
-/* When logo is inside a white box, make Mate dark */
-.bg-white .logo-mate {
-    color: var(--dark-green);
+/* Logo when on light background */
+.bg-white .logo-mate, .floating-card .logo-mate, .text-dark .logo-mate {
+    color: var(--forest-green);
 }
 
-/* Glassmorphism Card for Login/Register */
+/* Auth Pages (Glassmorphism) */
+.auth-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    background: url('../images/login-bg.jpg') center center / cover no-repeat;
+    position: relative;
+}
+.auth-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+}
+.auth-wrapper > div {
+    position: relative;
+    z-index: 1;
+}
+
 .glass-card {
-    background: rgba(30, 30, 30, 0.45) !important; /* Dark frosted glass */
+    background: rgba(30, 30, 30, 0.45) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     color: white !important;
+    border-radius: 12px;
 }
-
 .glass-card .form-control, .glass-card .form-select {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
 }
-
 .glass-card .form-control:focus, .glass-card .form-select:focus {
     background: rgba(255, 255, 255, 0.15);
-    border-color: #e67e22;
+    border-color: var(--sunrise-orange);
     box-shadow: 0 0 0 0.25rem rgba(230, 126, 34, 0.25);
     color: white;
 }
-
 .glass-card .form-control::placeholder {
     color: rgba(255, 255, 255, 0.6);
 }
-
-.glass-card .form-label, 
-.glass-card h4, 
-.glass-card p, 
-.glass-card .text-muted {
+.glass-card .form-label, .glass-card h4, .glass-card p, .glass-card .text-muted {
     color: rgba(255, 255, 255, 0.9) !important;
 }
-
-/* Specific auth page link color */
 .glass-card .auth-link {
-    color: #e67e22 !important;
+    color: var(--sunrise-orange) !important;
 }
 .glass-card .auth-link:hover {
     color: #f39c12 !important;
 }
-
-/* Fix browser autofill ruining the glassmorphism effect */
 .glass-card .form-control:-webkit-autofill,
 .glass-card .form-control:-webkit-autofill:hover, 
 .glass-card .form-control:-webkit-autofill:focus, 
@@ -336,9 +198,160 @@ body {
     -webkit-box-shadow: 0 0 0px 1000px rgba(30, 30, 30, 0.6) inset !important;
     transition: background-color 5000s ease-in-out 0s;
 }
-
-/* Fix dropdown options looking white/unreadable */
 .glass-card .form-select option {
     background-color: #2b2b2b;
     color: white;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.status-upcoming, .status-active {
+    background-color: #e3f2fd;
+    color: var(--mountain-blue);
+}
+.status-ongoing, .status-completed {
+    background-color: #e8f5e9;
+    color: var(--forest-green);
+}
+.status-pending {
+    background-color: #fff3e0;
+    color: var(--sunrise-orange);
+}
+.status-cancelled, .status-inactive {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+/* Stat Box */
+.stat-box {
+    background: rgba(30, 30, 30, 0.45) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 4px solid var(--forest-green);
+    border-radius: 12px;
+    padding: 20px;
+    color: white;
+}
+.stat-box.stat-blue { border-top-color: var(--mountain-blue); }
+.stat-box.stat-orange { border-top-color: var(--sunrise-orange); }
+
+.stat-box h6 {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.stat-box h2 {
+    font-size: 34px;
+    font-weight: 700;
+    margin: 0;
+    color: white;
+}
+
+/* Tables */
+.table-box {
+    background: rgba(30, 30, 30, 0.45) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    color: white;
+}
+.table-box table, .table-box thead, .table-box tbody, .table-box tr, .table-box th, .table-box td {
+    background-color: transparent !important;
+    --bs-table-bg: transparent;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.table-box thead {
+    background-color: rgba(0, 0, 0, 0.2) !important;
+}
+.table-box th {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600;
+    padding: 12px 16px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2) !important;
+}
+.table-box td {
+    padding: 16px;
+    vertical-align: middle;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Trek Cards (Glassmorphism) */
+.trek-card {
+    background: rgba(30, 30, 30, 0.45) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    border-radius: 12px;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.trek-card-img {
+    height: 140px;
+    background: linear-gradient(135deg, var(--forest-green), var(--mountain-blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+}
+.trek-card-body {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.trek-card-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+.trek-card-detail {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+}
+.trek-card-detail i {
+    width: 20px;
+    margin-right: 8px;
+    text-align: center;
+}
+.trek-card .status-badge {
+    margin-bottom: 12px;
+}
+.trek-card .btn {
+    margin-top: auto;
+}
+
+/* Filter Box Styling */
+.filter-box {
+    margin-bottom: 30px;
+}
+.filter-box .form-control, .filter-box .form-select {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+.filter-box .form-control:focus, .filter-box .form-select:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--sunrise-orange);
+    box-shadow: 0 0 0 0.25rem rgba(230, 126, 34, 0.25);
+    color: white;
+}
+.filter-box .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
 }

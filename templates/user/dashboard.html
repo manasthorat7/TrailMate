@@ -13,7 +13,7 @@
             <strong>{{ booking.trek.trek_name }}</strong>
             <div class="small text-muted">{{ booking.booking_date.strftime('%Y-%m-%d') }}</div>
         </div>
-        <span class="status-label status-{{ booking.status|lower }}">{{ booking.status }}</span>
+        <span class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</span>
     </div>
     {% endfor %}
 </div>
@@ -40,43 +40,36 @@
         </select>
     </div>
     <div class="col-md-1">
-        <button type="submit" class="btn btn-outline-primary w-100">Go</button>
+        <button type="submit" class="btn btn-sunrise w-100">Go</button>
     </div>
     <div class="col-md-1">
-        <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary w-100">Clear</a>
+        <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-light w-100">Clear</a>
     </div>
 </form>
 
-<div class="table-box">
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Trek Name</th>
-                <th>Location</th>
-                <th>Difficulty</th>
-                <th>Duration</th>
-                <th>Slots</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for trek in treks %}
-            <tr>
-                <td>{{ trek.trek_name }}</td>
-                <td>{{ trek.location }}</td>
-                <td>{{ trek.difficulty }}</td>
-                <td>{{ trek.duration }}</td>
-                <td>{{ trek.available_slots }}</td>
-                <td>
-                    <a href="{{ url_for('user.trek_details', trek_id=trek.trek_id) }}" class="btn btn-sm btn-primary">View Details</a>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="6" class="text-center text-muted">No open treks found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for trek in treks %}
+    <div class="col">
+        <div class="trek-card">
+            <div class="trek-card-img">
+                🏔
+            </div>
+            <div class="trek-card-body">
+                <div class="trek-card-title">{{ trek.trek_name }}</div>
+                <div class="trek-card-detail">📍 {{ trek.location }}</div>
+                <div class="trek-card-detail">🟢 {{ trek.difficulty }}</div>
+                <div class="trek-card-detail">📅 {{ trek.start_date }} - {{ trek.end_date }}</div>
+                <div class="trek-card-detail">👥 {{ trek.available_slots }} Slots Available</div>
+                <div class="trek-card-detail">👤 Staff: {{ trek.assigned_staff.name if trek.assigned_staff else 'Unassigned' }}</div>
+                
+                <a href="{{ url_for('user.trek_details', trek_id=trek.trek_id) }}" class="btn btn-sunrise w-100 mt-3">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-white-50">
+        No open treks found.
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

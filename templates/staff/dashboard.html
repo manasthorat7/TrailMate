@@ -35,7 +35,7 @@
                     <strong>{{ trek.trek_name }}</strong>
                     <div class="small text-muted">{{ trek.location }} | {{ trek.start_date }}</div>
                 </div>
-                <span class="status-label status-{{ trek.status|lower }}">{{ trek.status }}</span>
+                <span class="status-badge status-{{ trek.status|lower }}">{{ trek.status }}</span>
             </div>
             {% else %}
             <div class="text-muted">No treks assigned yet.</div>
@@ -52,7 +52,7 @@
                     <strong>{{ booking.user.name }}</strong>
                     <div class="small text-muted">{{ booking.trek.trek_name }}</div>
                 </div>
-                <span class="status-label status-confirmed">Booked</span>
+                <span class="status-badge status-confirmed">Booked</span>
             </div>
             {% else %}
             <div class="text-muted">No participants yet.</div>

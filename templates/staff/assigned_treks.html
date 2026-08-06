@@ -4,43 +4,47 @@
 <h3 class="page-title">My Assigned Treks</h3>
 <p class="page-subtitle">Update slots and trek status from here.</p>
 
-<div class="table-box">
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Trek Name</th>
-                <th>Location</th>
-                <th>Slots</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for trek in treks %}
-            <tr>
-                <td>{{ trek.trek_name }}</td>
-                <td>{{ trek.location }}</td>
-                <td>{{ trek.available_slots }}</td>
-                <td><span class="status-label status-{{ trek.status|lower }}">{{ trek.status }}</span></td>
-                <td>
-                    <form method="POST" action="{{ url_for('staff.update_status', trek_id=trek.trek_id) }}">
-                        <input type="number" name="available_slots" value="{{ trek.available_slots }}" min="0" class="form-control form-control-sm d-inline w-auto">
-                        <select name="status" class="form-select form-select-sm d-inline w-auto">
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for trek in treks %}
+    <div class="col">
+        <div class="trek-card">
+            <div class="trek-card-img">
+                🏔
+            </div>
+            <div class="trek-card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="trek-card-title mb-0">{{ trek.trek_name }}</div>
+                    <span class="status-badge status-{{ trek.status|lower }}">{{ trek.status }}</span>
+                </div>
+                
+                <div class="trek-card-detail">📍 {{ trek.location }}</div>
+                <div class="trek-card-detail">📅 {{ trek.start_date }} - {{ trek.end_date }}</div>
+                
+                <form method="POST" action="{{ url_for('staff.update_status', trek_id=trek.trek_id) }}" class="mt-4 pt-3 border-top border-secondary">
+                    <div class="mb-2">
+                        <label class="form-label small text-white-50 mb-1">Available Slots</label>
+                        <input type="number" name="available_slots" value="{{ trek.available_slots }}" min="0" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-white-50 mb-1">Status</label>
+                        <select name="status" class="form-select">
                             <option value="Upcoming" {% if trek.status == 'Upcoming' %}selected{% endif %}>Upcoming</option>
                             <option value="Ongoing" {% if trek.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
                             <option value="Completed" {% if trek.status == 'Completed' %}selected{% endif %}>Completed</option>
                         </select>
-                        <button type="submit" class="btn btn-primary btn-sm">Update</button>
-                        <a href="{{ url_for('staff.participants', trek_id=trek.trek_id) }}" class="btn btn-outline-secondary btn-sm">Participants</a>
-                    </form>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="5" class="text-center text-muted">No treks assigned yet.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    </div>
+                    <div class="d-flex gap-2 mt-auto">
+                        <button type="submit" class="btn btn-sunrise flex-grow-1">Update</button>
+                        <a href="{{ url_for('staff.participants', trek_id=trek.trek_id) }}" class="btn btn-outline-light">Participants</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-white-50">
+        No treks assigned yet.
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

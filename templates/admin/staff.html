@@ -9,10 +9,10 @@
         <input type="text" name="search" class="form-control" value="{{ search }}" placeholder="Search staff name or email">
     </div>
     <div class="col-md-2">
-        <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+        <button type="submit" class="btn btn-sunrise w-100">Search</button>
     </div>
     <div class="col-md-2">
-        <a href="{{ url_for('admin.manage_staff') }}" class="btn btn-outline-secondary w-100">Clear</a>
+        <a href="{{ url_for('admin.manage_staff') }}" class="btn btn-outline-light w-100">Clear</a>
     </div>
 </form>
 
@@ -31,7 +31,7 @@
             <tr>
                 <td>{{ staff.name }}</td>
                 <td>{{ staff.email }}</td>
-                <td><span class="status-label status-{{ staff.status|lower }}">{{ staff.status }}</span></td>
+                <td><span class="status-badge status-{{ staff.status|lower }}">{{ staff.status }}</span></td>
                 <td>
                     <form method="POST" class="d-inline">
                         <input type="hidden" name="staff_id" value="{{ staff.id }}">

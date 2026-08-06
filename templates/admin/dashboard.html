@@ -56,7 +56,7 @@
                         <td>{{ booking.user.name }}</td>
                         <td>{{ booking.trek.trek_name }}</td>
                         <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
-                        <td><span class="status-label status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
+                        <td><span class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
                     </tr>
                     {% else %}
                     <tr>
@@ -77,7 +77,7 @@
                     <strong>{{ trek.trek_name }}</strong>
                     <div class="small text-muted">{{ trek.location }} | {{ trek.start_date }}</div>
                 </div>
-                <span class="status-label status-upcoming">{{ trek.available_slots }} slots</span>
+                <span class="status-badge status-upcoming">{{ trek.available_slots }} slots</span>
             </div>
             {% else %}
             <div class="text-muted">No open treks right now.</div>

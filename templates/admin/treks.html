@@ -14,48 +14,45 @@
         <input type="text" name="search" class="form-control" value="{{ search }}" placeholder="Search trek, location or difficulty">
     </div>
     <div class="col-md-2">
-        <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+        <button type="submit" class="btn btn-sunrise w-100">Search</button>
     </div>
     <div class="col-md-2">
-        <a href="{{ url_for('admin.manage_treks') }}" class="btn btn-outline-secondary w-100">Clear</a>
+        <a href="{{ url_for('admin.manage_treks') }}" class="btn btn-outline-light w-100">Clear</a>
     </div>
 </form>
 
-<div class="table-box">
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Trek Name</th>
-                <th>Location</th>
-                <th>Difficulty</th>
-                <th>Slots</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for trek in treks %}
-            <tr>
-                <td>{{ trek.trek_id }}</td>
-                <td>{{ trek.trek_name }}</td>
-                <td>{{ trek.location }}</td>
-                <td>{{ trek.difficulty }}</td>
-                <td>{{ trek.available_slots }}</td>
-                <td><span class="status-label status-{{ trek.status|lower }}">{{ trek.status }}</span></td>
-                <td>
-                    <a href="{{ url_for('admin.edit_trek', trek_id=trek.trek_id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                    <form method="POST" action="{{ url_for('admin.delete_trek', trek_id=trek.trek_id) }}" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for trek in treks %}
+    <div class="col">
+        <div class="trek-card">
+            <div class="trek-card-img">
+                🏔
+            </div>
+            <div class="trek-card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="trek-card-title mb-0">{{ trek.trek_name }}</div>
+                    <span class="status-badge status-{{ trek.status|lower }}">{{ trek.status }}</span>
+                </div>
+                <div class="text-white-50 small mb-3">ID: {{ trek.trek_id }}</div>
+                
+                <div class="trek-card-detail">📍 {{ trek.location }}</div>
+                <div class="trek-card-detail">🟢 {{ trek.difficulty }}</div>
+                <div class="trek-card-detail">📅 {{ trek.start_date }} - {{ trek.end_date }}</div>
+                <div class="trek-card-detail">👥 {{ trek.available_slots }} Slots Available</div>
+                
+                <div class="mt-auto pt-3 d-flex gap-2">
+                    <a href="{{ url_for('admin.edit_trek', trek_id=trek.trek_id) }}" class="btn btn-sunrise flex-grow-1">Edit</a>
+                    <form method="POST" action="{{ url_for('admin.delete_trek', trek_id=trek.trek_id) }}" class="m-0">
+                        <button type="submit" class="btn btn-outline-light">Delete</button>
                     </form>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="7" class="text-center text-muted">No treks found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-white-50">
+        No treks found.
+    </div>
+    {% endfor %}
 </div>
 {% endblock %}

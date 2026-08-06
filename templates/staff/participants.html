@@ -27,7 +27,7 @@
                 <td>{{ booking.user.name }}</td>
                 <td>{{ booking.user.email }}</td>
                 <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
-                <td><span class="status-label status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
+                <td><span class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
             </tr>
             {% else %}
             <tr>

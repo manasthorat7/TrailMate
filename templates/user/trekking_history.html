@@ -18,7 +18,7 @@
             <tr>
                 <td>{{ booking.trek.trek_name }}</td>
                 <td>{{ booking.trek.start_date }} to {{ booking.trek.end_date }}</td>
-                <td><span class="status-label status-{{ booking.trek.status|lower }}">{{ booking.trek.status }}</span></td>
+                <td><span class="status-badge status-{{ booking.trek.status|lower }}">{{ booking.trek.status }}</span></td>
             </tr>
             {% else %}
             <tr>
