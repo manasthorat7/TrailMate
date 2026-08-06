@@ -38,12 +38,15 @@ def dashboard():
 
     all_treks = trek_query.order_by(Trek.start_date.asc()).all()
     locations = [row[0] for row in db.session.query(Trek.location).distinct().order_by(Trek.location).all()]
+    my_recent_bookings = Booking.query.filter_by(user_id=current_user.id).order_by(
+        Booking.booking_date.desc()).limit(3).all()
     return render_template('user/dashboard.html',
                            treks=all_treks,
                            locations=locations,
                            search=search,
                            difficulty=difficulty,
-                           location=location)
+                           location=location,
+                           my_recent_bookings=my_recent_bookings)
 
 
 @user_bp.route('/treks/<int:trek_id>')
@@ -51,7 +54,11 @@ def dashboard():
 @user_required
 def trek_details(trek_id):
     trek = Trek.query.get_or_404(trek_id)
-    existing_booking = Booking.query.filter_by(user_id=current_user.id, trek_id=trek_id).first()
+    existing_booking = Booking.query.filter(
+        Booking.user_id == current_user.id,
+        Booking.trek_id == trek_id,
+        Booking.status != 'Cancelled'
+    ).first()
     has_booked = existing_booking is not None
 
     return render_template('user/trek_details.html', trek=trek, has_booked=has_booked)
@@ -68,7 +75,11 @@ def book_trek(trek_id):
     if trek.available_slots <= 0:
         flash('Booking failed. This trek is fully booked.', 'danger')
         return redirect(url_for('user.trek_details', trek_id=trek_id))
-    existing_booking = Booking.query.filter_by(user_id=current_user.id, trek_id=trek_id).first()
+    existing_booking = Booking.query.filter(
+        Booking.user_id == current_user.id,
+        Booking.trek_id == trek_id,
+        Booking.status != 'Cancelled'
+    ).first()
     if existing_booking:
         flash('You have already booked this trek!', 'warning')
         return redirect(url_for('user.my_bookings'))
@@ -103,6 +114,9 @@ def cancel_booking(booking_id):
     if booking.trek.status == 'Completed':
         flash('Completed trek booking cannot be cancelled.', 'warning')
         return redirect(url_for('user.my_bookings'))
+    if booking.trek.status == 'Ongoing':
+        flash('Ongoing trek booking cannot be cancelled.', 'warning')
+        return redirect(url_for('user.my_bookings'))
 
     booking.status = 'Cancelled'
     booking.trek.available_slots += 1
@@ -125,8 +139,12 @@ def history():
 @user_required
 def profile():
     if request.method == 'POST':
-        current_user.name = request.form.get('name')
-        current_user.contact_details = request.form.get('contact_details')
+        name = (request.form.get('name') or '').strip()
+        if not name:
+            flash('Name cannot be empty.', 'danger')
+            return redirect(url_for('user.profile'))
+        current_user.name = name
+        current_user.contact_details = (request.form.get('contact_details') or '').strip()
         db.session.commit()
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('user.profile'))

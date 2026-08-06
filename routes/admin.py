@@ -27,13 +27,17 @@ def dashboard():
     total_staff = User.query.filter_by(role='staff', status='Active').count()
     total_bookings = Booking.query.count()
     recent_bookings = Booking.query.order_by(Booking.booking_date.desc()).limit(5).all()
+    open_treks = Trek.query.filter_by(status='Upcoming').order_by(Trek.start_date.asc()).limit(5).all()
+    pending_staff = User.query.filter_by(role='staff', status='Pending').count()
 
     return render_template('admin/dashboard.html',
                            total_treks=total_treks,
                            total_users=total_users,
                            total_staff=total_staff,
                            total_bookings=total_bookings,
-                           recent_bookings=recent_bookings)
+                           recent_bookings=recent_bookings,
+                           open_treks=open_treks,
+                           pending_staff=pending_staff)
 
 
 @admin_bp.route('/treks')
@@ -57,10 +61,10 @@ def manage_treks():
 @admin_required
 def add_trek():
     if request.method == 'POST':
-        trek_name = request.form.get('trek_name')
-        location = request.form.get('location')
+        trek_name = (request.form.get('trek_name') or '').strip()
+        location = (request.form.get('location') or '').strip()
         difficulty = request.form.get('difficulty')
-        duration = request.form.get('duration')
+        duration = (request.form.get('duration') or '').strip()
         available_slots = request.form.get('available_slots')
         assigned_staff_id = request.form.get('assigned_staff_id') or None
         start_date_str = request.form.get('start_date')
@@ -71,6 +75,12 @@ def add_trek():
             slots_int = int(available_slots)
         except (TypeError, ValueError):
             flash('Error: Please enter valid trek details.', 'danger')
+            return redirect(url_for('admin.add_trek'))
+        if not trek_name or not location or not duration:
+            flash('Error: Trek name, location and duration are required.', 'danger')
+            return redirect(url_for('admin.add_trek'))
+        if difficulty not in ['Easy', 'Moderate', 'Hard']:
+            flash('Error: Please select a valid difficulty.', 'danger')
             return redirect(url_for('admin.add_trek'))
         if start_date > end_date:
             flash('Error: The End Date cannot be earlier than the Start Date.', 'danger')
@@ -115,10 +125,10 @@ def add_trek():
 def edit_trek(trek_id):
     trek = Trek.query.get_or_404(trek_id)
     if request.method == 'POST':
-        trek.trek_name = request.form.get('trek_name')
-        trek.location = request.form.get('location')
+        trek.trek_name = (request.form.get('trek_name') or '').strip()
+        trek.location = (request.form.get('location') or '').strip()
         trek.difficulty = request.form.get('difficulty')
-        trek.duration = request.form.get('duration')
+        trek.duration = (request.form.get('duration') or '').strip()
         assigned_staff_id = request.form.get('assigned_staff_id') or None
 
         try:
@@ -127,6 +137,12 @@ def edit_trek(trek_id):
             end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d').date()
         except (TypeError, ValueError):
             flash('Error: Please enter valid trek details.', 'danger')
+            return redirect(url_for('admin.edit_trek', trek_id=trek.trek_id))
+        if not trek.trek_name or not trek.location or not trek.duration:
+            flash('Error: Trek name, location and duration are required.', 'danger')
+            return redirect(url_for('admin.edit_trek', trek_id=trek.trek_id))
+        if trek.difficulty not in ['Easy', 'Moderate', 'Hard']:
+            flash('Error: Please select a valid difficulty.', 'danger')
             return redirect(url_for('admin.edit_trek', trek_id=trek.trek_id))
 
         if start_date > end_date:

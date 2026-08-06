@@ -178,6 +178,26 @@ body {
     margin-bottom: 18px;
 }
 
+.simple-list {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 14px;
+}
+
+.list-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #edf1ef;
+}
+
+.list-line:last-child {
+    border-bottom: none;
+}
+
 .status-label {
     display: inline-block;
     padding: 4px 9px;

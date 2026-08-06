@@ -19,7 +19,7 @@
     </div>
     <div class="col-md-3">
         <div class="stat-box">
-            <h6>Total Staff</h6>
+            <h6>Active Staff</h6>
             <h2>{{ total_staff }}</h2>
         </div>
     </div>
@@ -31,33 +31,58 @@
     </div>
 </div>
 
-<h5 class="mb-3">Recent Bookings</h5>
-<div class="table-box">
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Booking ID</th>
-                <th>User</th>
-                <th>Trek</th>
-                <th>Date</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for booking in recent_bookings %}
-            <tr>
-                <td>{{ booking.booking_id }}</td>
-                <td>{{ booking.user.name }}</td>
-                <td>{{ booking.trek.trek_name }}</td>
-                <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
-                <td><span class="status-label status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
-            </tr>
+{% if pending_staff > 0 %}
+<div class="alert alert-warning">There are {{ pending_staff }} staff request(s) waiting for approval.</div>
+{% endif %}
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <h5 class="mb-3">Recent Bookings</h5>
+        <div class="table-box">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>User</th>
+                        <th>Trek</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in recent_bookings %}
+                    <tr>
+                        <td>{{ booking.booking_id }}</td>
+                        <td>{{ booking.user.name }}</td>
+                        <td>{{ booking.trek.trek_name }}</td>
+                        <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+                        <td><span class="status-label status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No bookings yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <h5 class="mb-3">Open Treks</h5>
+        <div class="simple-list">
+            {% for trek in open_treks %}
+            <div class="list-line">
+                <div>
+                    <strong>{{ trek.trek_name }}</strong>
+                    <div class="small text-muted">{{ trek.location }} | {{ trek.start_date }}</div>
+                </div>
+                <span class="status-label status-upcoming">{{ trek.available_slots }} slots</span>
+            </div>
             {% else %}
-            <tr>
-                <td colspan="5" class="text-center text-muted">No bookings yet.</td>
-            </tr>
+            <div class="text-muted">No open treks right now.</div>
             {% endfor %}
-        </tbody>
-    </table>
+        </div>
+    </div>
 </div>
 {% endblock %}

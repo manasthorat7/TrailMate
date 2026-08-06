@@ -4,6 +4,21 @@
 <h3 class="page-title">Available Treks</h3>
 <p class="page-subtitle">Browse open treks and book the one you like.</p>
 
+{% if my_recent_bookings %}
+<div class="simple-list mb-3">
+    <h5 class="mb-3">My Recent Bookings</h5>
+    {% for booking in my_recent_bookings %}
+    <div class="list-line">
+        <div>
+            <strong>{{ booking.trek.trek_name }}</strong>
+            <div class="small text-muted">{{ booking.booking_date.strftime('%Y-%m-%d') }}</div>
+        </div>
+        <span class="status-label status-{{ booking.status|lower }}">{{ booking.status }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <form method="GET" class="row g-2 filter-box">
     <div class="col-md-4">
         <input type="text" name="search" class="form-control" value="{{ search }}" placeholder="Search trek or location">

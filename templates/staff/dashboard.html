@@ -11,7 +11,55 @@
             <h2>{{ total_assigned }}</h2>
         </div>
     </div>
+    <div class="col-md-4">
+        <div class="stat-box">
+            <h6>Open Treks</h6>
+            <h2>{{ open_count }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-box">
+            <h6>Participants</h6>
+            <h2>{{ total_participants }}</h2>
+        </div>
+    </div>
 </div>
 
-<a href="{{ url_for('staff.assigned_treks') }}" class="btn btn-primary">View My Treks</a>
+<div class="row g-3">
+    <div class="col-lg-6">
+        <h5 class="mb-3">Assigned Treks</h5>
+        <div class="simple-list">
+            {% for trek in assigned_treks %}
+            <div class="list-line">
+                <div>
+                    <strong>{{ trek.trek_name }}</strong>
+                    <div class="small text-muted">{{ trek.location }} | {{ trek.start_date }}</div>
+                </div>
+                <span class="status-label status-{{ trek.status|lower }}">{{ trek.status }}</span>
+            </div>
+            {% else %}
+            <div class="text-muted">No treks assigned yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <h5 class="mb-3">Recent Participants</h5>
+        <div class="simple-list">
+            {% for booking in recent_bookings %}
+            <div class="list-line">
+                <div>
+                    <strong>{{ booking.user.name }}</strong>
+                    <div class="small text-muted">{{ booking.trek.trek_name }}</div>
+                </div>
+                <span class="status-label status-confirmed">Booked</span>
+            </div>
+            {% else %}
+            <div class="text-muted">No participants yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<a href="{{ url_for('staff.assigned_treks') }}" class="btn btn-primary mt-3">View My Treks</a>
 {% endblock %}
