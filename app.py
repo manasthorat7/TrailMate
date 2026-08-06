@@ -3,7 +3,7 @@ from flask import Flask
 from database import db
 
 
-def create_app():
+def create_app(db_name='trekking.db'):
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'trailmate-secret-key-123'
     basedir = os.path.abspath(os.path.dirname(__file__))
@@ -11,7 +11,7 @@ def create_app():
     if not os.path.exists(instance_path):
         os.makedirs(instance_path)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(instance_path, 'trekking.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(instance_path, db_name)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
     from flask_login import LoginManager

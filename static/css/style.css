@@ -80,16 +80,25 @@ body {
     background-color: transparent;
     color: #e7efeb;
     border: none;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    margin-bottom: 0;
+    padding: 14px 16px;
     font-size: 15px;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar .list-group-item:last-child {
+    border-bottom: none;
 }
 
 .sidebar .list-group-item:hover,
 .sidebar .list-group-item.active {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
     color: white;
+    border-left: 3px solid #66bb6a;
+    padding-left: 20px;
 }
 
 .content-area {
@@ -105,6 +114,23 @@ body {
     justify-content: center;
     min-height: 100vh;
     padding: 24px;
+    
+    /* Mountain Wallpaper Background */
+    background: url('../images/login-bg.jpg') center center / cover no-repeat;
+    position: relative;
+}
+
+/* Optional overlay to make the login box stand out more against the background */
+.auth-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.auth-wrapper > div {
+    position: relative;
+    z-index: 1;
 }
 
 .page-box {
@@ -244,4 +270,75 @@ body {
     .content-area {
         padding: 16px;
     }
+}
+
+/* Dual-color Elegant Logo */
+.logo-trail {
+    color: #e67e22; /* Warm earthy orange to match sunset */
+    font-weight: 800;
+}
+.logo-mate {
+    color: #ffffff;
+    font-weight: 300;
+}
+/* When logo is inside a white box, make Mate dark */
+.bg-white .logo-mate {
+    color: var(--dark-green);
+}
+
+/* Glassmorphism Card for Login/Register */
+.glass-card {
+    background: rgba(30, 30, 30, 0.45) !important; /* Dark frosted glass */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+}
+
+.glass-card .form-control, .glass-card .form-select {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.glass-card .form-control:focus, .glass-card .form-select:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #e67e22;
+    box-shadow: 0 0 0 0.25rem rgba(230, 126, 34, 0.25);
+    color: white;
+}
+
+.glass-card .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.glass-card .form-label, 
+.glass-card h4, 
+.glass-card p, 
+.glass-card .text-muted {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Specific auth page link color */
+.glass-card .auth-link {
+    color: #e67e22 !important;
+}
+.glass-card .auth-link:hover {
+    color: #f39c12 !important;
+}
+
+/* Fix browser autofill ruining the glassmorphism effect */
+.glass-card .form-control:-webkit-autofill,
+.glass-card .form-control:-webkit-autofill:hover, 
+.glass-card .form-control:-webkit-autofill:focus, 
+.glass-card .form-control:-webkit-autofill:active {
+    -webkit-text-fill-color: white !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(30, 30, 30, 0.6) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Fix dropdown options looking white/unreadable */
+.glass-card .form-select option {
+    background-color: #2b2b2b;
+    color: white;
 }

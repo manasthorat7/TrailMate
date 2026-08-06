@@ -4,10 +4,10 @@
 <div class="auth-wrapper">
     <div class="w-100" style="max-width: 400px;">
         <div class="text-center mb-4">
-            <h2 class="text-forest fw-bold">TrailMate</h2>
-            <p class="text-muted">Trekking Management Application</p>
+            <h2 class="fw-bold mb-1"><span class="logo-trail">Trail</span><span class="logo-mate">Mate</span></h2>
+            <p class="text-white-50">Trekking Management Application</p>
         </div>
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm glass-card">
             <div class="card-body p-4">
                 <h4 class="mb-4 text-center">Login</h4>
                 <form method="POST">
@@ -19,8 +19,8 @@
                         <label class="form-label">Password</label>
                         <input type="password" class="form-control" name="password" placeholder="Password" required>
                     </div>
-                    <button type="submit" class="btn btn-forest w-100 mb-3">Sign In</button>
-                    <p class="text-center text-muted mb-0">New here? <a href="{{ url_for('auth.register') }}" class="text-forest text-decoration-none fw-bold">Register</a></p>
+                    <button type="submit" class="btn btn-forest w-100 mb-3" style="background-color: #e67e22; border-color: #e67e22;">Sign In</button>
+                    <p class="text-center text-muted mb-0">New here? <a href="{{ url_for('auth.register') }}" class="auth-link text-decoration-none fw-bold">Register</a></p>
                 </form>
             </div>
         </div>
