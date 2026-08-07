@@ -80,10 +80,14 @@ pip install -r requirements.txt
 python seed.py
 
 # 5. Run the app
+# Normal mode (runs on port 5000):
 python app.py
+
+# OR run in test mode (runs on port 5001 with a separate database):
+python test_app.py
 ```
 
-The app will start at **http://127.0.0.1:5000** or **http://127.0.0.1:5001**.
+The app will start at **http://127.0.0.1:5000** (normal) or **http://127.0.0.1:5001** (test mode).
 
 ---
 
