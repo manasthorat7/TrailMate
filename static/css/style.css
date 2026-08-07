@@ -1,10 +1,10 @@
 :root {
-    --forest-green: #2c5e3b;
-    --forest-green-dark: #1f4229;
-    --mountain-blue: #3b5b78;
-    --mountain-blue-dark: #2a4157;
-    --sunrise-orange: #e67e22;
-    --sunrise-orange-dark: #cc701e;
+    --green: #2c5e3b;
+    --dark-green: #1f4229;
+    --blue: #3b5b78;
+    --dark-blue: #2a4157;
+    --orange: #e67e22;
+    --dark-orange: #cc701e;
     --bg-light: #f7f9f8;
     --text-dark: #2c3e50;
     --text-light: #7f8c8d;
@@ -30,51 +30,51 @@ body::before {
 }
 
 /* Base Utility Classes */
-.text-forest { color: var(--forest-green) !important; }
-.text-mountain { color: var(--mountain-blue) !important; }
-.text-sunrise { color: var(--sunrise-orange) !important; }
+.text-green { color: var(--green) !important; }
+.text-blue { color: var(--blue) !important; }
+.text-orange { color: var(--orange) !important; }
 
 /* Buttons */
-.btn-forest {
-    background-color: var(--forest-green);
+.btn-green {
+    background-color: var(--green);
     color: white;
-    border: 1px solid var(--forest-green);
+    border: 1px solid var(--green);
 }
-.btn-forest:hover {
-    background-color: var(--forest-green-dark);
-    border-color: var(--forest-green-dark);
-    color: white;
-}
-.btn-outline-forest {
-    color: var(--forest-green);
-    border-color: var(--forest-green);
-}
-.btn-outline-forest:hover {
-    background-color: var(--forest-green);
+.btn-green:hover {
+    background-color: var(--dark-green);
+    border-color: var(--dark-green);
     color: white;
 }
-.btn-mountain {
-    background-color: var(--mountain-blue);
-    color: white;
-    border: 1px solid var(--mountain-blue);
+.btn-outline-green {
+    color: var(--green);
+    border-color: var(--green);
 }
-.btn-mountain:hover {
-    background-color: var(--mountain-blue-dark);
+.btn-outline-green:hover {
+    background-color: var(--green);
     color: white;
 }
-.btn-sunrise {
-    background-color: var(--sunrise-orange);
+.btn-blue {
+    background-color: var(--blue);
     color: white;
-    border: 1px solid var(--sunrise-orange);
+    border: 1px solid var(--blue);
 }
-.btn-sunrise:hover {
-    background-color: var(--sunrise-orange-dark);
+.btn-blue:hover {
+    background-color: var(--dark-blue);
+    color: white;
+}
+.btn-orange {
+    background-color: var(--orange);
+    color: white;
+    border: 1px solid var(--orange);
+}
+.btn-orange:hover {
+    background-color: var(--dark-orange);
     color: white;
 }
 
 /* Floating Island Layout */
 .nav-island {
-    background-color: var(--forest-green);
+    background-color: var(--green);
     border-radius: 12px;
     margin: 20px;
     padding: 15px 25px;
@@ -110,7 +110,7 @@ body::before {
 }
 .nav-island-links a:hover,
 .nav-island-links a.active {
-    color: var(--sunrise-orange);
+    color: var(--orange);
 }
 
 /* Floating Card for Main Content */
@@ -126,7 +126,7 @@ body::before {
 
 /* Dual-color Elegant Logo */
 .logo-trail {
-    color: var(--sunrise-orange);
+    color: var(--orange);
     font-weight: 800;
 }
 .logo-mate {
@@ -135,10 +135,10 @@ body::before {
 }
 /* Logo when on light background */
 .bg-white .logo-mate, .floating-card .logo-mate, .text-dark .logo-mate {
-    color: var(--forest-green);
+    color: var(--green);
 }
 
-/* Auth Pages (Glassmorphism) */
+/* Auth Pages */
 .auth-wrapper {
     display: flex;
     align-items: center;
@@ -174,7 +174,7 @@ body::before {
 }
 .glass-card .form-control:focus, .glass-card .form-select:focus {
     background: rgba(255, 255, 255, 0.15);
-    border-color: var(--sunrise-orange);
+    border-color: var(--orange);
     box-shadow: 0 0 0 0.25rem rgba(230, 126, 34, 0.25);
     color: white;
 }
@@ -185,7 +185,7 @@ body::before {
     color: rgba(255, 255, 255, 0.9) !important;
 }
 .glass-card .auth-link {
-    color: var(--sunrise-orange) !important;
+    color: var(--orange) !important;
 }
 .glass-card .auth-link:hover {
     color: #f39c12 !important;
@@ -213,15 +213,15 @@ body::before {
 }
 .status-upcoming, .status-active {
     background-color: #e3f2fd;
-    color: var(--mountain-blue);
+    color: var(--blue);
 }
 .status-ongoing, .status-completed {
     background-color: #e8f5e9;
-    color: var(--forest-green);
+    color: var(--green);
 }
 .status-pending {
     background-color: #fff3e0;
-    color: var(--sunrise-orange);
+    color: var(--orange);
 }
 .status-cancelled, .status-inactive {
     background-color: #ffebee;
@@ -234,13 +234,13 @@ body::before {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-top: 4px solid var(--forest-green);
+    border-top: 4px solid var(--green);
     border-radius: 12px;
     padding: 20px;
     color: white;
 }
-.stat-box.stat-blue { border-top-color: var(--mountain-blue); }
-.stat-box.stat-orange { border-top-color: var(--sunrise-orange); }
+.stat-box.stat-blue { border-top-color: var(--blue); }
+.stat-box.stat-orange { border-top-color: var(--orange); }
 
 .stat-box h6 {
     color: rgba(255, 255, 255, 0.7);
@@ -286,7 +286,7 @@ body::before {
     color: rgba(255, 255, 255, 0.9) !important;
 }
 
-/* Trek Cards (Glassmorphism) */
+/* Trek Cards */
 .trek-card {
     background: rgba(30, 30, 30, 0.45) !important;
     backdrop-filter: blur(10px);
@@ -301,7 +301,7 @@ body::before {
 }
 .trek-card-img {
     height: 140px;
-    background: linear-gradient(135deg, var(--forest-green), var(--mountain-blue));
+    background: linear-gradient(135deg, var(--green), var(--blue));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -348,10 +348,20 @@ body::before {
 }
 .filter-box .form-control:focus, .filter-box .form-select:focus {
     background: rgba(255, 255, 255, 0.15);
-    border-color: var(--sunrise-orange);
+    border-color: var(--orange);
     box-shadow: 0 0 0 0.25rem rgba(230, 126, 34, 0.25);
     color: white;
 }
 .filter-box .form-control::placeholder {
     color: rgba(255, 255, 255, 0.6);
+}
+
+/* Text muted fix */
+.glass-card .text-muted, 
+.simple-list .text-muted, 
+.table-box .text-muted, 
+.trek-card .text-muted,
+.stat-box .text-muted,
+.floating-card .text-muted {
+    color: rgba(255, 255, 255, 0.7) !important;
 }

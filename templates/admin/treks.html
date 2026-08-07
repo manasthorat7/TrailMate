@@ -14,7 +14,7 @@
         <input type="text" name="search" class="form-control" value="{{ search }}" placeholder="Search trek, location or difficulty">
     </div>
     <div class="col-md-2">
-        <button type="submit" class="btn btn-sunrise w-100">Search</button>
+        <button type="submit" class="btn btn-orange w-100">Search</button>
     </div>
     <div class="col-md-2">
         <a href="{{ url_for('admin.manage_treks') }}" class="btn btn-outline-light w-100">Clear</a>
@@ -41,7 +41,7 @@
                 <div class="trek-card-detail">👥 {{ trek.available_slots }} Slots Available</div>
                 
                 <div class="mt-auto pt-3 d-flex gap-2">
-                    <a href="{{ url_for('admin.edit_trek', trek_id=trek.trek_id) }}" class="btn btn-sunrise flex-grow-1">Edit</a>
+                    <a href="{{ url_for('admin.edit_trek', trek_id=trek.trek_id) }}" class="btn btn-orange flex-grow-1">Edit</a>
                     <form method="POST" action="{{ url_for('admin.delete_trek', trek_id=trek.trek_id) }}" class="m-0">
                         <button type="submit" class="btn btn-outline-light">Delete</button>
                     </form>

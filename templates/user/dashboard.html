@@ -40,7 +40,7 @@
         </select>
     </div>
     <div class="col-md-1">
-        <button type="submit" class="btn btn-sunrise w-100">Go</button>
+        <button type="submit" class="btn btn-orange w-100">Go</button>
     </div>
     <div class="col-md-1">
         <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-light w-100">Clear</a>
@@ -62,7 +62,7 @@
                 <div class="trek-card-detail">👥 {{ trek.available_slots }} Slots Available</div>
                 <div class="trek-card-detail">👤 Staff: {{ trek.assigned_staff.name if trek.assigned_staff else 'Unassigned' }}</div>
                 
-                <a href="{{ url_for('user.trek_details', trek_id=trek.trek_id) }}" class="btn btn-sunrise w-100 mt-3">View Details</a>
+                <a href="{{ url_for('user.trek_details', trek_id=trek.trek_id) }}" class="btn btn-orange w-100 mt-3">View Details</a>
             </div>
         </div>
     </div>

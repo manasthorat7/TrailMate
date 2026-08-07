@@ -1,53 +1,103 @@
-# TrailMate - Trekking Management Application
+# TrailMate 🏔️
 
-TrailMate is a web-based Trekking Management Application developed using a modular Flask architecture. It is designed to be simple, maintainable, and readable, strictly adhering to core web development principles without over-engineering.
+A clean and simple Flask-based web application to manage trekking events, book slots, and oversee staff. Built as a passionate web dev project!
 
-## Technology Stack
-- **Backend:** Python, Flask, Flask-Blueprints
-- **Database:** SQLite, SQLAlchemy (ORM)
-- **Authentication:** Flask-Login, Werkzeug Security
-- **Frontend:** HTML5, Jinja2 Templating, Bootstrap 5 (CSS framework), Traditional CSS (Theme styling)
-
-## Core Features & Business Rules Implemented
-1. **Role-Based Access Control (RBAC):** Distinct dashboards and routing for `Admin`, `Staff`, and `User` roles.
-2. **Pre-existing Admin:** The database automatically seeds a default System Admin upon initialization if one does not exist.
-3. **Staff Approval Workflow:** Users registering as 'Staff' are placed in a 'Pending' status. They cannot log in until the Admin explicitly approves their account. Standard 'Users' do not require approval.
-4. **Isolated Staff Management:** Trek Guides (Staff) can only view participants and update the status of treks that are explicitly assigned to their `Staff ID`.
-5. **Booking Constraints:**
-   - **Prevent Overbooking:** A trekker cannot book a trek if `available_slots <= 0`. Upon successful booking, slots decrease programmatically.
-   - **Status Checks:** Trekkers can only book treks that are currently in the 'Upcoming' (Open) state.
-   - **No Double Booking:** A user cannot book the same trek twice.
-6. **Data Validation:** Backend logic ensures logical dates (Start Date <= End Date) and positive capacity inputs.
-
-## Database Schema Highlights
-- **User Table:** A unified table handling authentication for all three roles, eliminating the need for complex polymorphic inheritance.
-- **Trek Table:** Stores all mandatory event data. Features a Foreign Key (`assigned_staff_id`) linking to the User table (One-to-Many).
-- **Booking Table:** Acts as an association table, managing the Many-to-Many relationship between Users and Treks.
-
-## How to Run the Project Locally
-
-1. **Open your terminal** and navigate to the project root directory (`TrailMate/`).
-2. **Create a virtual environment:**
-   ```bash
-   python -m venv venv
-   ```
-3. **Activate the virtual environment:**
-   - Windows: `.\venv\Scripts\activate`
-   - Mac/Linux: `source venv/bin/activate`
-4. **Install required dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-5. **Run the application:**
-   ```bash
-   python app.py
-   ```
-   *Note: The SQLite database (`instance/trekking.db`) and the default Admin account will be created automatically upon the first run.*
-
-## Default Credentials
-To evaluate the admin features, log in using the automatically generated credentials:
-- **Email:** `admin@trailmate.com`
-- **Password:** `admin123`
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com/)
+[![SQLite](https://img.shields.io/badge/Database-SQLite-orange.svg)](https://www.sqlite.org/)
 
 ---
-*Developed for IIT Madras MAD1/MAD2 Project Evaluation.*
+
+## 🌟 Features
+
+### Admin Portal
+- Manage all treks (create, edit, delete).
+- Oversee bookings and total capacity.
+- Manage users and staff members (approve, blacklist, or activate).
+
+### Staff Portal
+- See treks assigned to you.
+- Track participant lists and update trek statuses (Upcoming, Ongoing, Completed).
+
+### User Portal
+- Browse through Indian and Himalayan treks (like Hampta Pass, Roopkund, Everest Base Camp).
+- Book your slot with one click.
+- See your trekking history and manage profile.
+
+---
+
+## 🛠️ Tech Stack
+- **Backend**: Python, Flask, Flask-SQLAlchemy, Werkzeug
+- **Frontend**: HTML5, CSS3 (Custom sleek translucent design), Bootstrap 5, Jinja2
+- **Database**: SQLite
+
+---
+
+## 📁 Project Structure
+```text
+TrailMate/
+│
+├── app.py                      # Main Flask application
+├── models.py                   # Database models (User, Trek, Booking)
+├── routes.py                   # App routes & endpoints
+├── seed.py                     # Generates dummy data (Indian context)
+│
+├── templates/                  # Jinja2 HTML Templates
+│   ├── base.html
+│   ├── auth/                   # Login & Register
+│   ├── admin/                  # Admin dashboard & management
+│   ├── staff/                  # Staff dashboard
+│   └── user/                   # User dashboard & booking
+│
+├── static/
+│   ├── css/style.css           # Custom UI styling 
+│   └── images/                 # Backgrounds & Assets
+│
+└── instance/                   # SQLite database (auto-generated)
+```
+
+---
+
+## 🚀 How to Run
+
+```bash
+# 1. Clone the repository
+git clone <your-repo-link>
+cd TrailMate
+
+# 2. Create and activate a virtual environment
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Generate Demo Data (Highly Recommended!)
+# This creates all the treks, users, and staff automatically
+python seed.py
+
+# 5. Run the app
+python app.py
+```
+
+The app will start at **http://127.0.0.1:5000** or **http://127.0.0.1:5001**.
+
+---
+
+## 🔑 Demo Logins
+
+If you used `seed.py`, try these to explore different roles:
+
+| Role | Email | Password |
+|------|----------|----------|
+| **Admin** | `admin@trailmate.com` | `admin123` |
+| **Staff** | `aditya@staff.com` | `staff123` |
+| **User** | `aarav@user.com` | `user123` |
+
+---
+<div align="center">
+Made with ❤️ Manas Thorat
+</div>
