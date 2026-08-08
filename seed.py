@@ -66,16 +66,16 @@ def run_seed():
 
 
         user_templates = [
-            {"name": "Tanishq Pardeshi", "email": "aarav@user.com", "status": "Active"},
-            {"name": "Kushagra Shukla", "email": "vihaan@user.com", "status": "Active"},
-            {"name": "Kush Patel", "email": "ishaan@user.com", "status": "Active"},
+            {"name": "Tanishq Pardeshi", "email": "tanishq@user.com", "status": "Active"},
+            {"name": "Kushagra Shukla", "email": "kushagra@user.com", "status": "Active"},
+            {"name": "Kush Patel", "email": "kush@user.com", "status": "Active"},
             {"name": "Ananya Gupta", "email": "ananya@user.com", "status": "Active"},
             {"name": "Diya Reddy", "email": "diya@user.com", "status": "Active"},
             {"name": "Aditi Deshpande", "email": "aditi@user.com", "status": "Active"},
             {"name": "Riya Desai", "email": "riya@user.com", "status": "Active"},
-            {"name": "Om Nerkar", "email": "kunal@user.com", "status": "Active"},
-            {"name": "Siddharth Iyer", "email": "meera@user.com", "status": "Active"},
-            {"name": "Arjun Patil", "email": "nikhil@user.com", "status": "Active"},
+            {"name": "Om Nerkar", "email": "om@user.com", "status": "Active"},
+            {"name": "Siddharth Iyer", "email": "siddharth@user.com", "status": "Active"},
+            {"name": "Arjun Patil", "email": "arjun@user.com", "status": "Active"},
             {"name": "Spammer (Blacklisted)", "email": "spam@user.com", "status": "Inactive"},
             {"name": "Bot (Blacklisted)", "email": "bot@user.com", "status": "Inactive"}
         ]
