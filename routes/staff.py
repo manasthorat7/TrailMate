@@ -93,7 +93,7 @@ def participants(trek_id):
     if trek.assigned_staff_id != current_user.id:
         flash('Unauthorized. You can only view participants for your own treks.', 'danger')
         return redirect(url_for('staff.assigned_treks'))
-    bookings = Booking.query.filter_by(trek_id=trek_id, status='Booked').all()
+    bookings = Booking.query.filter(Booking.trek_id == trek_id, Booking.status.in_(['Booked', 'Completed'])).all()
     return render_template('staff/participants.html', trek=trek, bookings=bookings)
 
 

@@ -152,7 +152,7 @@ def run_seed():
             else: 
                 booking_status = 'Booked'
                 
-            if booking_status == 'Booked' and t.available_slots > 0:
+            if booking_status in ['Booked', 'Completed'] and t.available_slots > 0:
                 booking = Booking(
                     user_id=u_id,
                     trek_id=t.trek_id,

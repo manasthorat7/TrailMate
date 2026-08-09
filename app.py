@@ -45,6 +45,8 @@ def create_app(db_name='trekking.db'):
         # Auto-complete treks whose end date has passed
         for t in Trek.query.filter(Trek.end_date < today, Trek.status != 'Completed').all():
             t.status = 'Completed'
+            for b in Booking.query.filter_by(trek_id=t.trek_id, status='Booked').all():
+                b.status = 'Completed'
             changed = True
             
         # Auto-start treks that are currently happening
