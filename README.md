@@ -17,7 +17,7 @@ A clean and simple Flask-based web application to manage trekking events, book s
 
 ### Staff Portal
 - See treks assigned to you.
-- Track participant lists and update trek statuses (Upcoming, Ongoing, Completed).
+- Track participant lists and update trek statuses (Open, Started, Completed).
 
 ### User Portal
 - Browse through Indian and Himalayan treks (like Hampta Pass, Roopkund, Everest Base Camp).

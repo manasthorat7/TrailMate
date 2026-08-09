@@ -53,8 +53,8 @@
                 <div class="col-md-6 mb-3">
                     <label>Status</label>
                     <select class="form-select" name="status">
-                        <option value="Upcoming" {% if trek.status == 'Upcoming' %}selected{% endif %}>Upcoming</option>
-                        <option value="Ongoing" {% if trek.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+                        <option value="Open" {% if trek.status == 'Open' %}selected{% endif %}>Open</option>
+                        <option value="Started" {% if trek.status == 'Started' %}selected{% endif %}>Started</option>
                         <option value="Completed" {% if trek.status == 'Completed' %}selected{% endif %}>Completed</option>
                     </select>
                 </div>

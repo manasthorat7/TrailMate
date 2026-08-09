@@ -55,7 +55,10 @@
                 🏔
             </div>
             <div class="trek-card-body">
-                <div class="trek-card-title">{{ trek.trek_name }}</div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="trek-card-title mb-0">{{ trek.trek_name }}</div>
+                    <span class="status-badge status-{{ trek.status|lower }}">{{ trek.status }}</span>
+                </div>
                 <div class="trek-card-detail">📍 {{ trek.location }}</div>
                 <div class="trek-card-detail">🟢 {{ trek.difficulty }}</div>
                 <div class="trek-card-detail">📅 {{ trek.start_date }} - {{ trek.end_date }}</div>

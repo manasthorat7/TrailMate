@@ -27,7 +27,7 @@ def dashboard():
     total_staff = User.query.filter_by(role='staff', status='Active').count()
     total_bookings = Booking.query.count()
     recent_bookings = Booking.query.order_by(Booking.booking_date.desc()).limit(5).all()
-    open_treks = Trek.query.filter_by(status='Upcoming').order_by(Trek.start_date.asc()).limit(5).all()
+    open_treks = Trek.query.filter_by(status='Open').order_by(Trek.start_date.asc()).limit(5).all()
     pending_staff = User.query.filter_by(role='staff', status='Pending').count()
 
     return render_template('admin/dashboard.html',
@@ -166,7 +166,7 @@ def edit_trek(trek_id):
         trek.available_slots = slots_int
         trek.assigned_staff_id = assigned_staff_id
         new_status = request.form.get('status')
-        if new_status not in ['Upcoming', 'Ongoing', 'Completed']:
+        if new_status not in ['Open', 'Started', 'Completed']:
             flash('Error: Please select a valid trek status.', 'danger')
             return redirect(url_for('admin.edit_trek', trek_id=trek.trek_id))
         trek.status = new_status

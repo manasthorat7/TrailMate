@@ -23,14 +23,14 @@ def staff_required(f):
 def dashboard():
     assigned = Trek.query.filter_by(assigned_staff_id=current_user.id).all()
     total_assigned = len(assigned)
-    open_count = sum(1 for trek in assigned if trek.status == 'Upcoming')
+    open_count = sum(1 for trek in assigned if trek.status == 'Open')
     total_participants = Booking.query.join(Trek).filter(
         Trek.assigned_staff_id == current_user.id,
-        Booking.status == 'Confirmed'
+        Booking.status == 'Booked'
     ).count()
     recent_bookings = Booking.query.join(Trek).filter(
         Trek.assigned_staff_id == current_user.id,
-        Booking.status == 'Confirmed'
+        Booking.status == 'Booked'
     ).order_by(Booking.booking_date.desc()).limit(5).all()
     return render_template('staff/dashboard.html',
                            total_assigned=total_assigned,
@@ -69,12 +69,12 @@ def update_status(trek_id):
         flash('Available slots cannot be negative.', 'danger')
         return redirect(url_for('staff.assigned_treks'))
 
-    booked_count = Booking.query.filter_by(trek_id=trek.trek_id, status='Confirmed').count()
+    booked_count = Booking.query.filter_by(trek_id=trek.trek_id, status='Booked').count()
     if slots < booked_count:
         flash('Slots cannot be less than current confirmed bookings.', 'danger')
         return redirect(url_for('staff.assigned_treks'))
 
-    if new_status in ['Upcoming', 'Ongoing', 'Completed']:
+    if new_status in ['Open', 'Started', 'Completed']:
         trek.status = new_status
         trek.available_slots = slots
         db.session.commit()
@@ -93,5 +93,24 @@ def participants(trek_id):
     if trek.assigned_staff_id != current_user.id:
         flash('Unauthorized. You can only view participants for your own treks.', 'danger')
         return redirect(url_for('staff.assigned_treks'))
-    bookings = Booking.query.filter_by(trek_id=trek_id, status='Confirmed').all()
+    bookings = Booking.query.filter_by(trek_id=trek_id, status='Booked').all()
     return render_template('staff/participants.html', trek=trek, bookings=bookings)
+
+
+@staff_bp.route('/bookings/<int:booking_id>/cancel', methods=['POST'])
+@login_required
+@staff_required
+def cancel_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    trek = Trek.query.get(booking.trek_id)
+    if not trek or trek.assigned_staff_id != current_user.id:
+        flash('Unauthorized. You can only manage participants for your own treks.', 'danger')
+        return redirect(url_for('staff.assigned_treks'))
+    
+    if booking.status == 'Booked':
+        booking.status = 'Cancelled'
+        trek.available_slots += 1
+        db.session.commit()
+        flash('Participant booking cancelled successfully.', 'success')
+    
+    return redirect(url_for('staff.participants', trek_id=trek.trek_id))

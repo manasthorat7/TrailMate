@@ -21,7 +21,7 @@
         
         {% if has_booked %}
             <div class="alert alert-info">You have already booked this trek.</div>
-        {% elif trek.status != 'Upcoming' or trek.available_slots <= 0 %}
+        {% elif trek.status != 'Open' or trek.available_slots <= 0 %}
             <div class="alert alert-warning">This trek is not available for booking.</div>
         {% else %}
             <form method="POST" action="{{ url_for('user.book_trek', trek_id=trek.trek_id) }}">

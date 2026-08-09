@@ -100,20 +100,20 @@ def run_seed():
 
         today = date.today()
         treks_templates = [
-            {"name": "Everest Base Camp", "loc": "Nepal", "diff": "Hard", "dur": "14 Days", "slots": 20, "status": "Upcoming", "start": today + timedelta(days=30), "end": today + timedelta(days=44)},
-            {"name": "Annapurna Base Camp", "loc": "Nepal", "diff": "Hard", "dur": "12 Days", "slots": 15, "status": "Ongoing", "start": today - timedelta(days=2), "end": today + timedelta(days=10)},
+            {"name": "Everest Base Camp", "loc": "Nepal", "diff": "Hard", "dur": "14 Days", "slots": 20, "status": "Open", "start": today + timedelta(days=30), "end": today + timedelta(days=44)},
+            {"name": "Annapurna Base Camp", "loc": "Nepal", "diff": "Hard", "dur": "12 Days", "slots": 15, "status": "Started", "start": today - timedelta(days=2), "end": today + timedelta(days=10)},
             {"name": "Roopkund Lake", "loc": "Uttarakhand, India", "diff": "Moderate", "dur": "8 Days", "slots": 25, "status": "Completed", "start": today - timedelta(days=20), "end": today - timedelta(days=12)},
-            {"name": "Hampta Pass", "loc": "Himachal Pradesh, India", "diff": "Moderate", "dur": "5 Days", "slots": 50, "status": "Upcoming", "start": today + timedelta(days=60), "end": today + timedelta(days=64)},
-            {"name": "K2 Base Camp", "loc": "Pakistan", "diff": "Hard", "dur": "14 Days", "slots": 10, "status": "Upcoming", "start": today + timedelta(days=15), "end": today + timedelta(days=28)},
+            {"name": "Hampta Pass", "loc": "Himachal Pradesh, India", "diff": "Moderate", "dur": "5 Days", "slots": 50, "status": "Open", "start": today + timedelta(days=60), "end": today + timedelta(days=64)},
+            {"name": "K2 Base Camp", "loc": "Pakistan", "diff": "Hard", "dur": "14 Days", "slots": 10, "status": "Open", "start": today + timedelta(days=15), "end": today + timedelta(days=28)},
             {"name": "Valley of Flowers", "loc": "Uttarakhand, India", "diff": "Easy", "dur": "4 Days", "slots": 30, "status": "Completed", "start": today - timedelta(days=60), "end": today - timedelta(days=56)},
-            {"name": "Goechala Trek", "loc": "Sikkim, India", "diff": "Hard", "dur": "11 Days", "slots": 12, "status": "Upcoming", "start": today + timedelta(days=45), "end": today + timedelta(days=56)},
-            {"name": "Harishchandragad Fort", "loc": "Maharashtra, India", "diff": "Easy", "dur": "1 Day", "slots": 40, "status": "Ongoing", "start": today, "end": today},
-            {"name": "Stok Kangri", "loc": "Ladakh, India", "diff": "Hard", "dur": "9 Days", "slots": 20, "status": "Upcoming", "start": today + timedelta(days=25), "end": today + timedelta(days=33)},
-            {"name": "Sandakphu Trek", "loc": "West Bengal, India", "diff": "Moderate", "dur": "6 Days", "slots": 18, "status": "Upcoming", "start": today + timedelta(days=80), "end": today + timedelta(days=85)},
+            {"name": "Goechala Trek", "loc": "Sikkim, India", "diff": "Hard", "dur": "11 Days", "slots": 12, "status": "Open", "start": today + timedelta(days=45), "end": today + timedelta(days=56)},
+            {"name": "Harishchandragad Fort", "loc": "Maharashtra, India", "diff": "Easy", "dur": "1 Day", "slots": 40, "status": "Started", "start": today, "end": today},
+            {"name": "Stok Kangri", "loc": "Ladakh, India", "diff": "Hard", "dur": "9 Days", "slots": 20, "status": "Open", "start": today + timedelta(days=25), "end": today + timedelta(days=33)},
+            {"name": "Sandakphu Trek", "loc": "West Bengal, India", "diff": "Moderate", "dur": "6 Days", "slots": 18, "status": "Open", "start": today + timedelta(days=80), "end": today + timedelta(days=85)},
             {"name": "Triund Trek", "loc": "Himachal Pradesh, India", "diff": "Easy", "dur": "2 Days", "slots": 25, "status": "Completed", "start": today - timedelta(days=100), "end": today - timedelta(days=98)},
-            {"name": "Kedarkantha Winter Trek", "loc": "Uttarakhand, India", "diff": "Moderate", "dur": "6 Days", "slots": 15, "status": "Upcoming", "start": today + timedelta(days=10), "end": today + timedelta(days=15)},
-            {"name": "Overbooking Test Trek", "loc": "Bhutan", "diff": "Easy", "dur": "3 Days", "slots": 3, "status": "Upcoming", "start": today + timedelta(days=5), "end": today + timedelta(days=8)},
-            {"name": "Unassigned Trail", "loc": "Meghalaya, India", "diff": "Easy", "dur": "2 Days", "slots": 10, "status": "Upcoming", "start": today + timedelta(days=1), "end": today + timedelta(days=2)}
+            {"name": "Kedarkantha Winter Trek", "loc": "Uttarakhand, India", "diff": "Moderate", "dur": "6 Days", "slots": 15, "status": "Open", "start": today + timedelta(days=10), "end": today + timedelta(days=15)},
+            {"name": "Overbooking Test Trek", "loc": "Bhutan", "diff": "Easy", "dur": "3 Days", "slots": 3, "status": "Open", "start": today + timedelta(days=5), "end": today + timedelta(days=8)},
+            {"name": "Unassigned Trail", "loc": "Meghalaya, India", "diff": "Easy", "dur": "2 Days", "slots": 10, "status": "Open", "start": today + timedelta(days=1), "end": today + timedelta(days=2)}
         ]
 
         treks = []
@@ -147,12 +147,12 @@ def run_seed():
             
             if t.status == 'Completed':
                 booking_status = 'Completed'
-            elif t.status == 'Upcoming':
-                booking_status = random.choices(['Confirmed', 'Cancelled'], weights=[80, 20])[0]
+            elif t.status == 'Open':
+                booking_status = random.choices(['Booked', 'Cancelled'], weights=[80, 20])[0]
             else: 
-                booking_status = 'Confirmed'
+                booking_status = 'Booked'
                 
-            if booking_status == 'Confirmed' and t.available_slots > 0:
+            if booking_status == 'Booked' and t.available_slots > 0:
                 booking = Booking(
                     user_id=u_id,
                     trek_id=t.trek_id,
@@ -173,7 +173,7 @@ def run_seed():
                 booking_count += 1
 
         db.session.commit()
-        print(f"=> Created {booking_count} Bookings (Confirmed, Cancelled, Completed).")
+        print(f"=> Created {booking_count} Bookings (Booked, Cancelled, Completed).")
         
         print("\n*** Seed Process Completed Successfully! ***")
         print("You can now test all major functionalities with this data.")

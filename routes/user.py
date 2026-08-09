@@ -25,7 +25,7 @@ def dashboard():
     difficulty = request.args.get('difficulty', '').strip()
     location = request.args.get('location', '').strip()
 
-    trek_query = Trek.query.filter_by(status='Upcoming')
+    trek_query = Trek.query.filter_by(status='Open')
     if search:
         trek_query = trek_query.filter(
             (Trek.trek_name.ilike(f'%{search}%')) |
@@ -69,8 +69,8 @@ def trek_details(trek_id):
 @user_required
 def book_trek(trek_id):
     trek = Trek.query.get_or_404(trek_id)
-    if trek.status != 'Upcoming':
-        flash('Booking failed. You can only book treks that are currently open (Upcoming).', 'danger')
+    if trek.status != 'Open':
+        flash('Booking failed. You can only book treks that are currently open (Open).', 'danger')
         return redirect(url_for('user.trek_details', trek_id=trek_id))
     if trek.available_slots <= 0:
         flash('Booking failed. This trek is fully booked.', 'danger')
@@ -83,7 +83,7 @@ def book_trek(trek_id):
     if existing_booking:
         flash('You have already booked this trek!', 'warning')
         return redirect(url_for('user.my_bookings'))
-    new_booking = Booking(user_id=current_user.id, trek_id=trek_id, status='Confirmed')
+    new_booking = Booking(user_id=current_user.id, trek_id=trek_id, status='Booked')
     db.session.add(new_booking)
     trek.available_slots -= 1
 
@@ -108,14 +108,14 @@ def cancel_booking(booking_id):
     if booking.user_id != current_user.id:
         flash('You can cancel only your own booking.', 'danger')
         return redirect(url_for('user.my_bookings'))
-    if booking.status != 'Confirmed':
+    if booking.status != 'Booked':
         flash('This booking is already cancelled or completed.', 'warning')
         return redirect(url_for('user.my_bookings'))
     if booking.trek.status == 'Completed':
         flash('Completed trek booking cannot be cancelled.', 'warning')
         return redirect(url_for('user.my_bookings'))
-    if booking.trek.status == 'Ongoing':
-        flash('Ongoing trek booking cannot be cancelled.', 'warning')
+    if booking.trek.status == 'Started':
+        flash('Started trek booking cannot be cancelled.', 'warning')
         return redirect(url_for('user.my_bookings'))
 
     booking.status = 'Cancelled'

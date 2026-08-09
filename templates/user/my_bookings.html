@@ -21,7 +21,7 @@
                 <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
                 <td><span class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
                 <td>
-                    {% if booking.status == 'Confirmed' and booking.trek.status != 'Completed' %}
+                    {% if booking.status == 'Booked' and booking.trek.status != 'Completed' %}
                     <form method="POST" action="{{ url_for('user.cancel_booking', booking_id=booking.booking_id) }}">
                         <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
                     </form>

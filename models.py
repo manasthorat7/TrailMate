@@ -24,7 +24,7 @@ class Trek(db.Model):
     available_slots = db.Column(db.Integer, nullable=False)
     assigned_staff_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
-    status = db.Column(db.String(50), nullable=False, default='Upcoming')  # Upcoming/Ongoing/Completed
+    status = db.Column(db.String(50), nullable=False, default='Open')  # Open/Started/Completed
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
     bookings = db.relationship('Booking', backref='trek', lazy=True)
@@ -36,4 +36,4 @@ class Booking(db.Model):
     trek_id = db.Column(db.Integer, db.ForeignKey('trek.trek_id'), nullable=False)
 
     booking_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    status = db.Column(db.String(50), nullable=False, default='Confirmed')  # Confirmed/Cancelled
+    status = db.Column(db.String(50), nullable=False, default='Booked')  # Booked/Cancelled
