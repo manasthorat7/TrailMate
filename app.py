@@ -36,6 +36,30 @@ def create_app(db_name='trekking.db'):
     app.register_blueprint(user_bp)
     from models import User, Trek, Booking  # Import here to ensure db knows about them
 
+    @app.before_request
+    def update_trek_statuses():
+        from datetime import date
+        today = date.today()
+        changed = False
+        
+        # Auto-complete treks whose end date has passed
+        for t in Trek.query.filter(Trek.end_date < today, Trek.status != 'Completed').all():
+            t.status = 'Completed'
+            changed = True
+            
+        # Auto-start treks that are currently happening
+        for t in Trek.query.filter(Trek.start_date <= today, Trek.end_date >= today, Trek.status != 'Started').all():
+            t.status = 'Started'
+            changed = True
+            
+        # Ensure future treks are open
+        for t in Trek.query.filter(Trek.start_date > today, Trek.status != 'Open').all():
+            t.status = 'Open'
+            changed = True
+            
+        if changed:
+            db.session.commit()
+
     with app.app_context():
         db.create_all()  # Creates tables if they do not exist
         admin = User.query.filter_by(role='admin').first()
