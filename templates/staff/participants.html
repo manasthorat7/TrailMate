@@ -1,50 +1,76 @@
 {% extends "staff/staff_layout.html" %}
-{% block title %}Participants{% endblock %}
+{% block title %}Participants: {{ trek.trek_name }} &bull; TrailMate{% endblock %}
+
 {% block staff_content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
     <div>
-        <h3 class="page-title">Participants</h3>
-        <p class="page-subtitle mb-0">{{ trek.trek_name }}</p>
+        <div class="small text-muted mb-1"><i class="bi bi-geo-alt"></i> {{ trek.location }} &bull; {{ trek.duration }}</div>
+        <h1 class="page-header-title">Participants: {{ trek.trek_name }}</h1>
+        <p class="page-header-subtitle">Field roster of confirmed and completed trekkers for this expedition departure.</p>
     </div>
-    <a href="{{ url_for('staff.assigned_treks') }}" class="btn btn-secondary btn-sm">Back</a>
+    <div>
+        <a href="{{ url_for('staff.assigned_treks') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Assigned Treks
+        </a>
+    </div>
 </div>
 
-<div class="table-box">
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Booking ID</th>
-                <th>User Name</th>
-                <th>Email</th>
-                <th>Booking Date</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for booking in bookings %}
-            <tr>
-                <td>{{ booking.booking_id }}</td>
-                <td>{{ booking.user.name }}</td>
-                <td>{{ booking.user.email }}</td>
-                <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
-                <td><span class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
-                <td>
-                    {% if booking.status == 'Booked' %}
-                    <form method="POST" action="{{ url_for('staff.cancel_booking', booking_id=booking.booking_id) }}" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Cancel</button>
-                    </form>
-                    {% else %}
-                    -
-                    {% endif %}
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="6" class="text-center text-muted">No participants booked for this trek yet.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="content-panel">
+    <div class="panel-header">
+        <h5 class="panel-title"><i class="bi bi-people text-success me-2"></i> Trekker Roster</h5>
+        <span class="badge bg-light text-dark border px-3 py-2 fw-bold">{{ bookings|length }} Confirmed / Completed</span>
+    </div>
+    <div class="table-responsive">
+        <table class="tm-table">
+            <thead>
+                <tr>
+                    <th>Ref ID</th>
+                    <th>Trekker Name</th>
+                    <th>Email Address</th>
+                    <th>Booking Date</th>
+                    <th>Status</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td class="fw-bold text-muted">#{{ booking.booking_id }}</td>
+                    <td class="fw-bold text-dark fs-6">{{ booking.user.name }}</td>
+                    <td>
+                        <a href="mailto:{{ booking.user.email }}" class="text-decoration-none text-secondary">
+                            <i class="bi bi-envelope"></i> {{ booking.user.email }}
+                        </a>
+                    </td>
+                    <td class="small text-muted">{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <span class="badge-status status-{{ booking.status|lower }}">{{ booking.status }}</span>
+                    </td>
+                    <td class="text-end">
+                        {% if booking.status == 'Booked' %}
+                        <form method="POST" action="{{ url_for('staff.cancel_booking', booking_id=booking.booking_id) }}" class="d-inline" onsubmit="return confirm('Cancel reservation for participant {{ booking.user.name }}? The slot will be returned to available capacity.');">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </button>
+                        </form>
+                        {% else %}
+                            <span class="small text-muted">&mdash;</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-5">
+                        <div class="empty-state">
+                            <i class="bi bi-person-x empty-state-icon"></i>
+                            <h5 class="empty-state-title">No Trekkers Booked Yet</h5>
+                            <p class="empty-state-text">No participants have reserved spots for this expedition departure yet.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

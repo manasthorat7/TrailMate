@@ -1,65 +1,109 @@
 {% extends "staff/staff_layout.html" %}
-{% block title %}Staff Dashboard{% endblock %}
-{% block staff_content %}
-<h3 class="page-title">My Dashboard</h3>
-<p class="page-subtitle">Treks assigned by the admin.</p>
+{% block title %}Guide Dashboard &bull; TrailMate{% endblock %}
 
+{% block staff_content %}
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h1 class="page-header-title">Guide Operations</h1>
+        <p class="page-header-subtitle">Welcome back, {{ current_user.name }}. Monitor your assigned itineraries and trekker rosters.</p>
+    </div>
+    <a href="{{ url_for('staff.assigned_treks') }}" class="btn btn-primary btn-sm">
+        <i class="bi bi-compass"></i> View Assigned Treks
+    </a>
+</div>
+
+<!-- 3 Stat Metrics -->
 <div class="row g-3 mb-4">
     <div class="col-md-4">
-        <div class="stat-box">
-            <h6>Assigned Treks</h6>
-            <h2>{{ total_assigned }}</h2>
+        <div class="stat-card">
+            <div>
+                <div class="stat-card-label">Assigned Treks</div>
+                <div class="stat-card-value">{{ total_assigned }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="bi bi-compass"></i>
+            </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-box">
-            <h6>Open Treks</h6>
-            <h2>{{ open_count }}</h2>
+        <div class="stat-card accent">
+            <div>
+                <div class="stat-card-label">Open For Booking</div>
+                <div class="stat-card-value">{{ open_count }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="bi bi-calendar-check"></i>
+            </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-box">
-            <h6>Participants</h6>
-            <h2>{{ total_participants }}</h2>
+        <div class="stat-card">
+            <div>
+                <div class="stat-card-label">Total Participants</div>
+                <div class="stat-card-value">{{ total_participants }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="bi bi-people"></i>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="row g-3">
+<div class="row g-4">
+    <!-- Assigned Treks Column -->
     <div class="col-lg-6">
-        <h5 class="mb-3">Assigned Treks</h5>
-        <div class="simple-list">
-            {% for trek in assigned_treks %}
-            <div class="list-line">
-                <div>
-                    <strong>{{ trek.trek_name }}</strong>
-                    <div class="small text-muted">{{ trek.location }} | {{ trek.start_date }}</div>
-                </div>
-                <span class="status-badge status-{{ trek.status|lower }}">{{ trek.status }}</span>
+        <div class="content-panel h-100">
+            <div class="panel-header">
+                <h5 class="panel-title"><i class="bi bi-map text-success me-2"></i> My Assigned Itineraries</h5>
+                <a href="{{ url_for('staff.assigned_treks') }}" class="btn btn-outline-secondary btn-sm">Manage</a>
             </div>
-            {% else %}
-            <div class="text-muted">No treks assigned yet.</div>
-            {% endfor %}
+            <div class="p-3">
+                <div class="d-flex flex-column gap-2">
+                    {% for trek in assigned_treks %}
+                    <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between" style="background-color: var(--tm-bg);">
+                        <div>
+                            <div class="fw-bold text-dark">{{ trek.trek_name }}</div>
+                            <div class="small text-muted">
+                                <i class="bi bi-geo-alt"></i> {{ trek.location }} &bull; {{ trek.start_date.strftime('%b %d') }} - {{ trek.end_date.strftime('%b %d') }}
+                            </div>
+                        </div>
+                        <span class="badge-status status-{{ trek.status|lower }}">{{ trek.status }}</span>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">No treks currently assigned to you.</div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Recent Participants Column -->
     <div class="col-lg-6">
-        <h5 class="mb-3">Recent Participants</h5>
-        <div class="simple-list">
-            {% for booking in recent_bookings %}
-            <div class="list-line">
-                <div>
-                    <strong>{{ booking.user.name }}</strong>
-                    <div class="small text-muted">{{ booking.trek.trek_name }}</div>
-                </div>
-                <span class="status-badge status-confirmed">Booked</span>
+        <div class="content-panel h-100">
+            <div class="panel-header">
+                <h5 class="panel-title"><i class="bi bi-person-check text-success me-2"></i> Recent Confirmed Trekkers</h5>
             </div>
-            {% else %}
-            <div class="text-muted">No participants yet.</div>
-            {% endfor %}
+            <div class="p-3">
+                <div class="d-flex flex-column gap-2">
+                    {% for booking in recent_bookings %}
+                    <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between" style="background-color: var(--tm-bg);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-card-icon" style="width: 38px; height: 38px; font-size: 1.1rem;">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">{{ booking.user.name }}</div>
+                                <div class="small text-muted">{{ booking.trek.trek_name }}</div>
+                            </div>
+                        </div>
+                        <span class="badge-status status-booked">Booked</span>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">No participants booked for your treks yet.</div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
-<a href="{{ url_for('staff.assigned_treks') }}" class="btn btn-primary mt-3">View My Treks</a>
 {% endblock %}

@@ -1,4 +1,4 @@
-from app import create_app
+from app import create_app, init_db
 
 # This script runs the app using the 'test_trekking.db' database on port 5001.
 # It is completely separate from your main 'app.py' which runs 'trekking.db' on port 5000.
@@ -11,4 +11,5 @@ if __name__ == '__main__':
     print("Database: test_trekking.db")
     print("Port: 5001")
     print("==================================================")
+    init_db(app)
     app.run(port=5001, debug=True)

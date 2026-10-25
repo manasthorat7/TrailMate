@@ -3,18 +3,31 @@ seed.py
 Initializes the database with testing data for TrailMate.
 """
 
+import sys
+import random
+from datetime import datetime, timedelta, date
+from werkzeug.security import generate_password_hash
 from app import create_app
 from database import db
 from models import User, Trek, Booking
-from werkzeug.security import generate_password_hash
-from datetime import datetime, timedelta, date
-import random
 
-def run_seed():
-    app = create_app(db_name='test_trekking.db')
+
+def run_seed(db_name=None, app=None):
+    if app is None:
+        if db_name:
+            app = create_app(db_name=db_name)
+        else:
+            # Uses DATABASE_URL if configured, otherwise defaults to local SQLite
+            app = create_app()
+
     with app.app_context():
-        
-        
+        from app import is_production_mode
+        if is_production_mode(app.config) and os.environ.get('ALLOW_PRODUCTION_SEED', '').lower() not in ('true', '1'):
+            raise RuntimeError(
+                "Safety block: seed.py is intended for development and demo data. "
+                "Running seed.py against a production database is blocked unless ALLOW_PRODUCTION_SEED=1 is set."
+            )
+
         print("Initializing database...")
         db.create_all()
 
@@ -23,7 +36,6 @@ def run_seed():
             return
 
         print("Database is empty. Seeding data...")
-
 
         admin = User.query.filter_by(role='admin').first()
         if not admin:
@@ -38,7 +50,6 @@ def run_seed():
             db.session.commit()
             print("=> Admin created.")
 
-
         staff_templates = [
             {"name": "Aditya (Active Staff)", "email": "aditya@staff.com", "status": "Active"},
             {"name": "Neha (Active Staff)", "email": "neha@staff.com", "status": "Active"},
@@ -46,7 +57,7 @@ def run_seed():
             {"name": "Simran (Pending Staff)", "email": "simran@staff.com", "status": "Pending"},
             {"name": "Kabir (Blacklisted)", "email": "kabir@staff.com", "status": "Inactive"}
         ]
-        
+
         active_staff_ids = []
         for s in staff_templates:
             staff_user = User(
@@ -58,12 +69,11 @@ def run_seed():
                 contact_details="1234567890"
             )
             db.session.add(staff_user)
-            db.session.flush() # To get the ID before committing
+            db.session.flush()  # To get the ID before committing
             if s['status'] == 'Active':
                 active_staff_ids.append(staff_user.id)
-                
-        print(f"=> Created 5 Staff members.")
 
+        print(f"=> Created 5 Staff members.")
 
         user_templates = [
             {"name": "Tanishq Pardeshi", "email": "tanishq@user.com", "status": "Active"},
@@ -79,7 +89,7 @@ def run_seed():
             {"name": "Spammer (Blacklisted)", "email": "spam@user.com", "status": "Inactive"},
             {"name": "Bot (Blacklisted)", "email": "bot@user.com", "status": "Inactive"}
         ]
-        
+
         active_user_ids = []
         for u in user_templates:
             trekker = User(
@@ -93,10 +103,9 @@ def run_seed():
             db.session.flush()
             if u['status'] == 'Active':
                 active_user_ids.append(trekker.id)
-                
+
         print(f"=> Created 12 Users.")
         db.session.commit()
-
 
         today = date.today()
         treks_templates = [
@@ -121,7 +130,7 @@ def run_seed():
             assigned_staff = None
             if t['name'] != 'Unassigned Trail':
                 assigned_staff = random.choice(active_staff_ids)
-                
+
             trek = Trek(
                 trek_name=t['name'],
                 location=t['loc'],
@@ -135,23 +144,22 @@ def run_seed():
             )
             db.session.add(trek)
             treks.append(trek)
-            
+
         db.session.commit()
         print(f"=> Created 14 Treks covering all edge cases.")
-
 
         booking_count = 0
         for i in range(35):
             u_id = random.choice(active_user_ids)
             t = random.choice(treks)
-            
+
             if t.status == 'Completed':
                 booking_status = 'Completed'
             elif t.status == 'Open':
                 booking_status = random.choices(['Booked', 'Cancelled'], weights=[80, 20])[0]
-            else: 
+            else:
                 booking_status = 'Booked'
-                
+
             if booking_status in ['Booked', 'Completed'] and t.available_slots > 0:
                 booking = Booking(
                     user_id=u_id,
@@ -174,9 +182,11 @@ def run_seed():
 
         db.session.commit()
         print(f"=> Created {booking_count} Bookings (Booked, Cancelled, Completed).")
-        
+
         print("\n*** Seed Process Completed Successfully! ***")
         print("You can now test all major functionalities with this data.")
 
+
 if __name__ == '__main__':
-    run_seed()
+    target = sys.argv[1] if len(sys.argv) > 1 else None
+    run_seed(target)

@@ -1,31 +1,72 @@
 {% extends "user/user_layout.html" %}
-{% block title %}History{% endblock %}
-{% block user_content %}
-<h3 class="page-title">Trekking History</h3>
-<p class="page-subtitle">Completed treks will appear here.</p>
+{% block title %}Trekking History &bull; TrailMate{% endblock %}
 
-<div class="table-box">
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Trek Name</th>
-                <th>Trek Dates</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for booking in history %}
-            <tr>
-                <td>{{ booking.trek.trek_name }}</td>
-                <td>{{ booking.trek.start_date }} to {{ booking.trek.end_date }}</td>
-                <td><span class="status-badge status-{{ booking.trek.status|lower }}">{{ booking.trek.status }}</span></td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="3" class="text-center text-muted">No completed treks yet.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% block user_content %}
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h1 class="page-header-title">Expedition History</h1>
+        <p class="page-header-subtitle">Your completed summits, high passes, and mountain adventures.</p>
+    </div>
+    <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-compass"></i> Find Next Expedition
+    </a>
+</div>
+
+<div class="content-panel">
+    <div class="panel-header">
+        <h5 class="panel-title"><i class="bi bi-trophy text-warning me-2"></i> Completed Summits</h5>
+        <span class="badge bg-success-subtle text-success border px-3 py-2 fw-bold">{{ history|length }} Completed</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="tm-table">
+            <thead>
+                <tr>
+                    <th>Expedition</th>
+                    <th>Region / Location</th>
+                    <th>Dates Completed</th>
+                    <th>Trail Grade</th>
+                    <th>Milestone</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in history %}
+                <tr>
+                    <td>
+                        <div class="fw-bold text-dark fs-6">{{ booking.trek.trek_name }}</div>
+                        <div class="small text-muted">{{ booking.trek.duration }} expedition</div>
+                    </td>
+                    <td>
+                        <i class="bi bi-geo-alt text-danger"></i> {{ booking.trek.location }}
+                    </td>
+                    <td>
+                        <div class="small fw-semibold text-dark">{{ booking.trek.start_date.strftime('%B %d') }} &ndash; {{ booking.trek.end_date.strftime('%B %d, %Y') }}</div>
+                    </td>
+                    <td>
+                        <span class="badge-difficulty {{ booking.trek.difficulty|lower }}">{{ booking.trek.difficulty }}</span>
+                    </td>
+                    <td>
+                        <span class="badge-status status-completed">
+                            <i class="bi bi-patch-check-fill text-success"></i> Summit Completed
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <i class="bi bi-mountain empty-state-icon"></i>
+                            <h4 class="empty-state-title">No Completed Expeditions Yet</h4>
+                            <p class="empty-state-text">Once you complete a booked trek whose end date has passed, your mountain milestone will be commemorated here.</p>
+                            <a href="{{ url_for('user.dashboard') }}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-compass"></i> Explore Open Treks
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

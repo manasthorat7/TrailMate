@@ -1,87 +1,151 @@
 {% extends "admin/admin_layout.html" %}
-{% block title %}Admin Dashboard{% endblock %}
-{% block admin_content %}
-<h3 class="page-title">Dashboard</h3>
-<p class="page-subtitle">Quick view of TrailMate records.</p>
+{% block title %}Admin Dashboard &bull; TrailMate{% endblock %}
 
+{% block admin_content %}
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h1 class="page-header-title">Operations Dashboard</h1>
+        <p class="page-header-subtitle">Real-time overview of trekking expeditions, registrations, and staff allocation.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('admin.add_trek') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg"></i> Add New Trek
+        </a>
+    </div>
+</div>
+
+<!-- 4 Key Metrics -->
 <div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="stat-box">
-            <h6>Total Treks</h6>
-            <h2>{{ total_treks }}</h2>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div>
+                <div class="stat-card-label">Total Treks</div>
+                <div class="stat-card-value">{{ total_treks }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="bi bi-compass"></i>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-box">
-            <h6>Total Users</h6>
-            <h2>{{ total_users }}</h2>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card accent">
+            <div>
+                <div class="stat-card-label">Trekkers</div>
+                <div class="stat-card-value">{{ total_users }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="bi bi-people"></i>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-box">
-            <h6>Active Staff</h6>
-            <h2>{{ total_staff }}</h2>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div>
+                <div class="stat-card-label">Active Staff</div>
+                <div class="stat-card-value">{{ total_staff }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="bi bi-person-badge"></i>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-box">
-            <h6>Total Bookings</h6>
-            <h2>{{ total_bookings }}</h2>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card accent">
+            <div>
+                <div class="stat-card-label">Total Bookings</div>
+                <div class="stat-card-value">{{ total_bookings }}</div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="bi bi-ticket-perforated"></i>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Pending Approvals Alert -->
 {% if pending_staff > 0 %}
-<div class="alert alert-warning">There are {{ pending_staff }} staff request(s) waiting for approval.</div>
+<div class="alert alert-warning border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-3">
+        <i class="bi bi-exclamation-triangle-fill fs-4 text-warning"></i>
+        <div>
+            <div class="fw-bold">Staff Approvals Pending</div>
+            <div class="small">There are <strong>{{ pending_staff }}</strong> mountain guide applicant(s) waiting for administrator verification.</div>
+        </div>
+    </div>
+    <a href="{{ url_for('admin.manage_staff') }}" class="btn btn-warning btn-sm fw-bold">
+        Review Applications <i class="bi bi-arrow-right"></i>
+    </a>
+</div>
 {% endif %}
 
-<div class="row g-3">
+<!-- Split Overview Sections -->
+<div class="row g-4">
+    <!-- Left: Recent Bookings -->
     <div class="col-lg-7">
-        <h5 class="mb-3">Recent Bookings</h5>
-        <div class="table-box">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Booking ID</th>
-                        <th>User</th>
-                        <th>Trek</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for booking in recent_bookings %}
-                    <tr>
-                        <td>{{ booking.booking_id }}</td>
-                        <td>{{ booking.user.name }}</td>
-                        <td>{{ booking.trek.trek_name }}</td>
-                        <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
-                        <td><span class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">No bookings yet.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="content-panel h-100">
+            <div class="panel-header">
+                <h5 class="panel-title"><i class="bi bi-clock-history text-success me-2"></i> Recent Bookings</h5>
+                <a href="{{ url_for('admin.view_bookings') }}" class="btn btn-outline-secondary btn-sm">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="tm-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Trekker</th>
+                            <th>Expedition</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in recent_bookings %}
+                        <tr>
+                            <td class="fw-bold text-muted">#{{ booking.booking_id }}</td>
+                            <td class="fw-semibold text-dark">{{ booking.user.name }}</td>
+                            <td>{{ booking.trek.trek_name }}</td>
+                            <td class="small text-muted">{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <span class="badge-status status-{{ booking.status|lower }}">{{ booking.status }}</span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">No recent bookings recorded.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+    <!-- Right: Open Treks -->
     <div class="col-lg-5">
-        <h5 class="mb-3">Open Treks</h5>
-        <div class="simple-list">
-            {% for trek in open_treks %}
-            <div class="list-line">
-                <div>
-                    <strong>{{ trek.trek_name }}</strong>
-                    <div class="small text-muted">{{ trek.location }} | {{ trek.start_date }}</div>
-                </div>
-                <span class="status-badge status-upcoming">{{ trek.available_slots }} slots</span>
+        <div class="content-panel h-100">
+            <div class="panel-header">
+                <h5 class="panel-title"><i class="bi bi-check2-circle text-success me-2"></i> Open Expeditions</h5>
+                <a href="{{ url_for('admin.manage_treks') }}" class="btn btn-outline-secondary btn-sm">Manage</a>
             </div>
-            {% else %}
-            <div class="text-muted">No open treks right now.</div>
-            {% endfor %}
+            <div class="p-3">
+                <div class="d-flex flex-column gap-2">
+                    {% for trek in open_treks %}
+                    <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between" style="background-color: var(--tm-bg);">
+                        <div>
+                            <div class="fw-bold text-dark">{{ trek.trek_name }}</div>
+                            <div class="small text-muted">
+                                <i class="bi bi-geo-alt"></i> {{ trek.location }} &bull; {{ trek.start_date.strftime('%b %d') }}
+                            </div>
+                        </div>
+                        <span class="badge bg-success-subtle text-success border px-2 py-1 fw-bold small">
+                            {{ trek.available_slots }} slots
+                        </span>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-4">No open treks scheduled.</div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>

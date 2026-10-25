@@ -1,21 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="nav-island">
-    <div class="d-flex align-items-center">
-        <h4 class="mb-0 me-4"><span class="logo-trail">Trail</span><span class="logo-mate">Mate</span></h4>
-        <span class="badge bg-light text-green me-3">Staff Panel</span>
-    </div>
-    <div class="nav-island-links d-flex align-items-center flex-wrap">
-        <a href="{{ url_for('staff.dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('staff.assigned_treks') }}">My Treks</a>
-    </div>
-    <div class="d-flex align-items-center">
-        <span class="text-white-50 small text-truncate me-3">{{ current_user.name }}</span>
-        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm rounded-pill px-3">Logout</a>
-    </div>
-</div>
+<nav class="tm-navbar" style="background-color: #1a3c2a;">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{{ url_for('auth.index') }}" class="brand-logo">
+                <i class="bi bi-compass-fill logo-icon text-warning"></i>
+                <span class="logo-trail">Trail</span><span class="logo-mate">Mate</span>
+            </a>
+            <span class="portal-badge" style="background-color: rgba(255, 255, 255, 0.15);">Guide Portal</span>
+        </div>
 
-<div class="floating-card">
-    {% block staff_content %}{% endblock %}
-</div>
+        <div class="d-flex align-items-center flex-wrap gap-1 order-3 order-md-2 mt-2 mt-md-0">
+            <a href="{{ url_for('staff.dashboard') }}" class="nav-link {% if request.endpoint == 'staff.dashboard' %}active{% endif %}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="{{ url_for('staff.assigned_treks') }}" class="nav-link {% if 'assigned_treks' in request.endpoint or 'participants' in request.endpoint %}active{% endif %}">
+                <i class="bi bi-compass"></i> My Assigned Treks
+            </a>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 order-2 order-md-3">
+            <span class="user-chip d-none d-sm-inline-flex">
+                <i class="bi bi-person-badge text-warning"></i> {{ current_user.name }}
+            </span>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm btn-pill">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </div>
+</nav>
+
+<main class="portal-container">
+    <div class="container">
+        {% block staff_content %}{% endblock %}
+    </div>
+</main>
+
+<footer class="py-4 border-top text-center text-muted small bg-white mt-auto">
+    <div class="container">
+        &copy; 2026 TrailMate &bull; Mountain Guide Operations & Field Roster
+    </div>
+</footer>
 {% endblock %}

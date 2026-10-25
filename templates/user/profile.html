@@ -1,26 +1,74 @@
 {% extends "user/user_layout.html" %}
-{% block title %}Profile{% endblock %}
-{% block user_content %}
-<h3 class="page-title">Profile</h3>
-<p class="page-subtitle">Update your basic contact details.</p>
+{% block title %}My Profile &bull; TrailMate{% endblock %}
 
-<div class="glass-card">
-    <div class="card-body">
-        <form method="POST">
-            <div class="mb-3">
-                <label>Name</label>
-                <input type="text" class="form-control" name="name" value="{{ current_user.name }}" required>
+{% block user_content %}
+<div class="page-header">
+    <h1 class="page-header-title">Trekker Profile</h1>
+    <p class="page-header-subtitle">Manage your personal details and emergency contact information.</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="content-panel p-4 text-center">
+            <div class="mx-auto mb-3 stat-card-icon" style="width: 80px; height: 80px; font-size: 2.2rem; border-radius: 50%;">
+                <i class="bi bi-person-fill"></i>
             </div>
-            <div class="mb-3">
-                <label>Email</label>
-                <input type="email" class="form-control" name="email" value="{{ current_user.email }}" readonly>
+            <h4 class="fw-bold mb-1 text-dark">{{ current_user.name }}</h4>
+            <p class="small text-muted mb-2">{{ current_user.email }}</p>
+            <div>
+                <span class="badge-status status-active">
+                    <i class="bi bi-check-circle-fill"></i> Active Trekker
+                </span>
             </div>
-            <div class="mb-3">
-                <label>Contact Details</label>
-                <input type="text" class="form-control" name="contact_details" value="{{ current_user.contact_details }}">
+            <hr class="my-4" style="border-color: var(--tm-border-light);">
+            <div class="small text-muted text-start">
+                <div class="fw-bold text-dark mb-1"><i class="bi bi-shield-lock"></i> Account Role:</div>
+                Standard Trekker account with access to explore routes, reserve slots, and track history.
             </div>
-            <button type="submit" class="btn btn-primary">Update Profile</button>
-        </form>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="content-panel">
+            <div class="panel-header">
+                <h5 class="panel-title"><i class="bi bi-sliders text-success me-2"></i> Account Details</h5>
+            </div>
+            <div class="p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ current_user.name }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="email">Registered Email (Cannot be changed)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control bg-light" id="email" name="email" value="{{ current_user.email }}" readonly>
+                        </div>
+                        <div class="form-text small text-muted">Email is used as your unique login identifier.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="contact_details">Emergency Phone / Contact Details</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-telephone"></i></span>
+                            <input type="text" class="form-control" id="contact_details" name="contact_details" value="{{ current_user.contact_details or '' }}" placeholder="+91 98765 43210">
+                        </div>
+                        <div class="form-text small text-muted">Used by expedition guides for pre-trek communications and safety alerts.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check2"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

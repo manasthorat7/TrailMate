@@ -1,35 +1,67 @@
 {% extends "admin/admin_layout.html" %}
-{% block title %}Bookings{% endblock %}
-{% block admin_content %}
-<h3 class="page-title">Bookings</h3>
-<p class="page-subtitle">All trek bookings made by users.</p>
+{% block title %}Master Bookings &bull; TrailMate{% endblock %}
 
-<div class="table-box">
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Booking ID</th>
-                <th>Trek Name</th>
-                <th>User</th>
-                <th>Booking Date</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for booking in bookings %}
-            <tr>
-                <td>{{ booking.booking_id }}</td>
-                <td>{{ booking.trek.trek_name }}</td>
-                <td>{{ booking.user.name }}</td>
-                <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
-                <td><span class="status-badge status-{{ booking.status|lower }}">{{ booking.status }}</span></td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="5" class="text-center text-muted">No bookings found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% block admin_content %}
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h1 class="page-header-title">Master Bookings Log</h1>
+        <p class="page-header-subtitle">Comprehensive ledger of all user reservations, confirmations, and cancellations.</p>
+    </div>
+    <div class="text-md-end text-muted small">
+        <span class="badge bg-light text-dark border px-3 py-2 fw-bold">{{ bookings|length }} Total Bookings</span>
+    </div>
+</div>
+
+<div class="content-panel">
+    <div class="panel-header">
+        <h5 class="panel-title"><i class="bi bi-ticket-detailed text-success me-2"></i> All Reservations</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="tm-table">
+            <thead>
+                <tr>
+                    <th>Ref ID</th>
+                    <th>Expedition</th>
+                    <th>Trekker Name</th>
+                    <th>User Email</th>
+                    <th>Booking Date</th>
+                    <th class="text-end">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td class="fw-bold text-muted">#{{ booking.booking_id }}</td>
+                    <td>
+                        <div class="fw-bold text-dark">{{ booking.trek.trek_name }}</div>
+                        <div class="small text-muted"><i class="bi bi-geo-alt"></i> {{ booking.trek.location }}</div>
+                    </td>
+                    <td class="fw-semibold text-dark">{{ booking.user.name }}</td>
+                    <td>
+                        <a href="mailto:{{ booking.user.email }}" class="text-decoration-none text-secondary small">
+                            <i class="bi bi-envelope"></i> {{ booking.user.email }}
+                        </a>
+                    </td>
+                    <td>
+                        <span class="small text-muted">{{ booking.booking_date.strftime('%Y-%m-%d %H:%M') if booking.booking_date else '&mdash;' }}</span>
+                    </td>
+                    <td class="text-end">
+                        <span class="badge-status status-{{ booking.status|lower }}">{{ booking.status }}</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-5">
+                        <div class="empty-state">
+                            <i class="bi bi-ticket-perforated empty-state-icon"></i>
+                            <h5 class="empty-state-title">No Bookings Recorded</h5>
+                            <p class="empty-state-text">Once trekkers reserve slots, their booking records will appear here.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

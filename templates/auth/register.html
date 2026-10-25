@@ -1,38 +1,78 @@
 {% extends "base.html" %}
-{% block title %}Register - TrailMate{% endblock %}
+{% block title %}Create Account &bull; TrailMate Expeditions{% endblock %}
+
 {% block content %}
-<div class="auth-wrapper py-5">
-    <div class="w-100" style="max-width: 450px;">
-        <div class="text-center mb-4">
-            <h2 class="fw-bold mb-1"><span class="logo-trail">Trail</span><span class="logo-mate">Mate</span></h2>
-            <p class="text-white-50">Start Your Adventure Today</p>
-        </div>
-        <div class="card border-0 shadow-sm glass-card">
-            <div class="card-body p-4">
-                <h4 class="mb-4 text-center">Create an Account</h4>
-                <form method="POST">
-                    <div class="mb-3">
-                        <input type="text" class="form-control" name="name" placeholder="Full Name" required>
+<div class="auth-page">
+    <div class="auth-card-container" style="max-width: 500px;">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="{{ url_for('auth.index') }}" class="brand-logo brand-dark mb-3">
+                    <i class="bi bi-compass-fill logo-icon"></i>
+                    <span class="logo-trail">Trail</span><span class="logo-mate">Mate</span>
+                </a>
+                <h3>Start Your Adventure</h3>
+                <p>Register to book alpine treks or lead mountain expeditions.</p>
+            </div>
+
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label" for="name">Full Name</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" id="name" name="name" placeholder="John Doe" required autofocus>
                     </div>
-                    <div class="mb-3">
-                        <input type="email" class="form-control" name="email" placeholder="Email Address" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="email">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                        <input type="email" class="form-control border-start-0 ps-0" id="email" name="email" placeholder="name@example.com" required>
                     </div>
-                    <div class="mb-3">
-                        <input type="password" class="form-control" name="password" placeholder="Password" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="password">Password (minimum 6 characters)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control border-start-0 ps-0" id="password" name="password" minlength="6" placeholder="Choose a secure password" required>
                     </div>
-                    <div class="mb-3">
-                        <select class="form-select" name="role">
-                            <option value="user">I am a Trekker (User)</option>
-                            <option value="staff">I am a Trek Guide (Staff)</option>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="role">Account Type</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-shield-check"></i></span>
+                        <select class="form-select border-start-0 ps-0" id="role" name="role" required>
+                            <option value="user" selected>Trekker (Book & explore expeditions)</option>
+                            <option value="staff">Mountain Guide / Staff (Lead assigned expeditions)</option>
                         </select>
                     </div>
-                    <div class="mb-4">
-                        <input type="text" class="form-control" name="contact_details" placeholder="Contact Details (Optional)">
+                    <div class="form-text small text-muted">Mountain Guide accounts require administrator approval before logging in.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label" for="contact_details">Phone / Contact Details (Optional)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-telephone"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0" id="contact_details" name="contact_details" placeholder="+91 98765 43210">
                     </div>
-                    <button type="submit" class="btn btn-orange w-100 mb-3">Register</button>
-                    <p class="text-center text-muted mb-0">Already have an account? <a href="{{ url_for('auth.login') }}" class="auth-link text-decoration-none fw-bold">Sign In</a></p>
-                </form>
-            </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                    <i class="bi bi-check2-circle"></i> Create Account
+                </button>
+
+                <div class="text-center pt-2 border-top">
+                    <p class="small text-muted mb-2">
+                        Already have an account? 
+                        <a href="{{ url_for('auth.login') }}" class="fw-bold text-decoration-none">Sign In</a>
+                    </p>
+                    <a href="{{ url_for('auth.index') }}" class="small text-secondary text-decoration-none">
+                        <i class="bi bi-arrow-left"></i> Return to Homepage
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 </div>

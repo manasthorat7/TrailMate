@@ -3,12 +3,16 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import User
 from database import db
+
 auth_bp = Blueprint('auth', __name__)
 
 
 @auth_bp.route('/', methods=['GET'])
 def index():
-    return redirect(url_for('auth.login'))
+    from models import Trek
+    featured_treks = Trek.query.filter_by(status='Open').order_by(Trek.start_date.asc()).limit(6).all()
+    return render_template('landing.html', treks=featured_treks)
+
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -89,8 +93,8 @@ def logout():
 
 def redirect_based_on_role(role):
     if role == 'admin':
-        return redirect('/admin/dashboard')  # We will use url_for when admin routes are built
+        return redirect(url_for('admin.dashboard'))
     elif role == 'staff':
-        return redirect('/staff/dashboard')
+        return redirect(url_for('staff.dashboard'))
     else:
-        return redirect('/user/dashboard')
+        return redirect(url_for('user.dashboard'))

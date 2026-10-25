@@ -1,33 +1,143 @@
 {% extends "user/user_layout.html" %}
-{% block title %}Book Trek{% endblock %}
-{% block user_content %}
-<h3 class="page-title">{{ trek.trek_name }}</h3>
-<p class="page-subtitle">Review trek details before booking.</p>
+{% block title %}{{ trek.trek_name }} &bull; Expedition Details{% endblock %}
 
-<div class="glass-card mb-4">
-    <div class="card-body p-4">
-        <div class="row">
-            <div class="col-md-6">
-                <p><strong>Location:</strong> {{ trek.location }}</p>
-                <p><strong>Difficulty:</strong> {{ trek.difficulty }}</p>
-                <p><strong>Duration:</strong> {{ trek.duration }}</p>
+{% block user_content %}
+<!-- Breadcrumb -->
+<nav class="mb-4" aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a href="{{ url_for('user.dashboard') }}" class="text-decoration-none text-muted"><i class="bi bi-compass"></i> Expeditions</a></li>
+        <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">{{ trek.trek_name }}</li>
+    </ol>
+</nav>
+
+{% set trek_img = 'images/trek_lake.jpg' if ('Lake' in trek.trek_name or 'Roopkund' in trek.trek_name) else ('images/trek_forest.jpg' if ('Valley' in trek.trek_name or 'Flower' in trek.trek_name or 'Fort' in trek.trek_name or 'Trail' in trek.trek_name or 'Triund' in trek.trek_name) else ('images/trek_summit.jpg' if ('Summit' in trek.trek_name or 'K2' in trek.trek_name or 'Kangri' in trek.trek_name) else 'images/trek_himalayas.jpg')) %}
+
+<div class="row g-4">
+    <!-- Left Column: Photography & Expedition Details -->
+    <div class="col-lg-8">
+        <div class="content-panel mb-4 overflow-hidden">
+            <div class="position-relative" style="height: 380px;">
+                <img src="{{ url_for('static', filename=trek_img) }}" alt="{{ trek.trek_name }}" class="w-100 h-100 object-fit-cover">
+                <div class="position-absolute top-0 start-0 m-3">
+                    <span class="badge-difficulty {{ trek.difficulty|lower }} shadow-sm">
+                        <i class="bi bi-triangle-fill"></i> {{ trek.difficulty }} Grade
+                    </span>
+                </div>
+                <div class="position-absolute top-0 end-0 m-3">
+                    <span class="badge-status status-{{ trek.status|lower }} shadow-sm">{{ trek.status }}</span>
+                </div>
             </div>
-            <div class="col-md-6">
-                <p><strong>Dates:</strong> {{ trek.start_date }} to {{ trek.end_date }}</p>
-                <p><strong>Available Slots:</strong> {{ trek.available_slots }}</p>
-                <p><strong>Status:</strong> <span class="status-badge status-{{ trek.status|lower }}">{{ trek.status }}</span></p>
+
+            <div class="p-4 p-md-5">
+                <div class="d-flex align-items-center gap-2 text-uppercase fw-bold text-muted small mb-2">
+                    <i class="bi bi-geo-alt-fill text-danger"></i> {{ trek.location }}
+                </div>
+                <h1 class="display-6 fw-bold mb-4" style="color: var(--tm-text);">{{ trek.trek_name }}</h1>
+
+                <!-- Key Attributes Grid -->
+                <div class="row g-3 p-3 rounded-4 mb-4" style="background-color: var(--tm-bg); border: 1px solid var(--tm-border);">
+                    <div class="col-6 col-md-3">
+                        <div class="small text-muted"><i class="bi bi-clock"></i> Duration</div>
+                        <div class="fw-bold fs-6 text-dark">{{ trek.duration }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="small text-muted"><i class="bi bi-calendar-event"></i> Expedition Dates</div>
+                        <div class="fw-bold fs-6 text-dark">{{ trek.start_date.strftime('%b %d') }} - {{ trek.end_date.strftime('%b %d, %Y') }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="small text-muted"><i class="bi bi-bar-chart-steps"></i> Trail Grade</div>
+                        <div class="fw-bold fs-6 text-dark">{{ trek.difficulty }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="small text-muted"><i class="bi bi-person-badge"></i> Assigned Guide</div>
+                        <div class="fw-bold fs-6 text-dark">{{ trek.assigned_staff.name if trek.assigned_staff else 'Wilderness Staff' }}</div>
+                    </div>
+                </div>
+
+                <!-- Expedition Description & Preparation Notes -->
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle text-success me-2"></i> Expedition Overview</h5>
+                <p class="text-secondary leading-relaxed mb-4">
+                    The {{ trek.trek_name }} route is an exhilarating mountain journey through {{ trek.location }}. Designed for passionate trekkers seeking pristine alpine wilderness, this itinerary combines scenic high-altitude viewpoints, remote ridge trails, and expert wilderness leadership.
+                </p>
+
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-shield-check text-success me-2"></i> Safety & Logistics</h5>
+                <ul class="list-unstyled text-secondary small d-flex flex-column gap-2 mb-0">
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                        <span>Lead guide is wilderness first-responder certified with extensive local terrain familiarity.</span>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                        <span>Strict participant caps maintained to ensure dedicated personal attention and low environmental footprint.</span>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                        <span>Daily weather briefings and acclimatization checks conducted prior to high-pass ascents.</span>
+                    </li>
+                </ul>
             </div>
         </div>
-        
-        {% if has_booked %}
-            <div class="alert alert-info">You have already booked this trek.</div>
-        {% elif trek.status != 'Open' or trek.available_slots <= 0 %}
-            <div class="alert alert-warning">This trek is not available for booking.</div>
-        {% else %}
-            <form method="POST" action="{{ url_for('user.book_trek', trek_id=trek.trek_id) }}">
-                <button type="submit" class="btn btn-primary">Confirm Booking</button>
-            </form>
-        {% endif %}
+    </div>
+
+    <!-- Right Column: Sticky Booking Card -->
+    <div class="col-lg-4">
+        <div class="content-panel p-4 position-sticky" style="top: 90px;">
+            <h4 class="fw-bold mb-1 text-dark">Reserve Your Slot</h4>
+            <p class="small text-muted mb-3">Live capacity status for this departure.</p>
+
+            <div class="p-3 rounded-3 mb-4" style="background-color: var(--tm-bg); border: 1px solid var(--tm-border);">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small fw-bold text-dark">Available Slots:</span>
+                    <span class="badge bg-success-subtle text-success fs-6 fw-bold px-3">{{ trek.available_slots }} open</span>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi bi-lightning-charge text-warning"></i> Real-time slot allocation on confirmation.
+                </div>
+            </div>
+
+            {% if has_booked %}
+                <div class="alert alert-info border-0 rounded-3 d-flex align-items-start gap-2 mb-3">
+                    <i class="bi bi-check-circle-fill text-info fs-5 flex-shrink-0"></i>
+                    <div>
+                        <div class="fw-bold">Already Reserved</div>
+                        <div class="small">You have an active reservation for this trek.</div>
+                    </div>
+                </div>
+                <a href="{{ url_for('user.my_bookings') }}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-ticket-perforated"></i> View in My Bookings
+                </a>
+            {% elif trek.status != 'Open' or trek.available_slots <= 0 %}
+                <div class="alert alert-warning border-0 rounded-3 d-flex align-items-start gap-2 mb-3">
+                    <i class="bi bi-exclamation-triangle-fill text-warning fs-5 flex-shrink-0"></i>
+                    <div>
+                        <div class="fw-bold">Booking Unavailable</div>
+                        <div class="small">This trek is currently fully booked or closed for new registrations.</div>
+                    </div>
+                </div>
+                <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-compass"></i> Explore Other Treks
+                </a>
+            {% else %}
+                <form method="POST" action="{{ url_for('user.book_trek', trek_id=trek.trek_id) }}">
+                    <div class="small text-muted mb-3">
+                        By confirming, 1 slot will be reserved under your account: <strong>{{ current_user.email }}</strong>.
+                    </div>
+                    <button type="submit" class="btn btn-accent w-100 py-3 fs-6">
+                        <i class="bi bi-check2-circle"></i> Confirm Booking
+                    </button>
+                </form>
+                <div class="text-center mt-3">
+                    <span class="small text-muted"><i class="bi bi-arrow-counterclockwise"></i> Free cancellation prior to departure</span>
+                </div>
+            {% endif %}
+
+            <hr class="my-4" style="border-color: var(--tm-border-light);">
+
+            <div class="small text-muted">
+                <div class="fw-bold text-dark mb-1"><i class="bi bi-telephone-inbound"></i> Mountain Guide Desk</div>
+                Questions about packing lists or fitness requirements? Reach out through your profile or at support@trailmate.com
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

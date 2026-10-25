@@ -1,24 +1,53 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="nav-island">
-    <div class="d-flex align-items-center">
-        <h4 class="mb-0 me-4"><span class="logo-trail">Trail</span><span class="logo-mate">Mate</span></h4>
-        <span class="badge bg-light text-green me-3">Admin Panel</span>
-    </div>
-    <div class="nav-island-links d-flex align-items-center flex-wrap">
-        <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('admin.manage_treks') }}">Treks</a>
-        <a href="{{ url_for('admin.manage_staff') }}">Staff</a>
-        <a href="{{ url_for('admin.manage_users') }}">Users</a>
-        <a href="{{ url_for('admin.view_bookings') }}">Bookings</a>
-    </div>
-    <div class="d-flex align-items-center">
-        <span class="text-white-50 small me-3">Admin User</span>
-        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm rounded-pill px-3">Logout</a>
-    </div>
-</div>
+<nav class="tm-navbar" style="background-color: #0f2419;">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{{ url_for('admin.dashboard') }}" class="brand-logo">
+                <i class="bi bi-shield-lock-fill logo-icon text-warning"></i>
+                <span class="logo-trail">Trail</span><span class="logo-mate">Mate</span>
+            </a>
+            <span class="portal-badge" style="background-color: rgba(211, 105, 40, 0.25); border-color: rgba(211, 105, 40, 0.4); color: #fbd38d;">Admin Panel</span>
+        </div>
 
-<div class="floating-card">
-    {% block admin_content %}{% endblock %}
-</div>
+        <div class="d-flex align-items-center flex-wrap gap-1 order-3 order-md-2 mt-2 mt-md-0">
+            <a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="{{ url_for('admin.manage_treks') }}" class="nav-link {% if 'treks' in request.endpoint %}active{% endif %}">
+                <i class="bi bi-compass"></i> Treks
+            </a>
+            <a href="{{ url_for('admin.manage_staff') }}" class="nav-link {% if request.endpoint == 'admin.manage_staff' %}active{% endif %}">
+                <i class="bi bi-person-badge"></i> Staff
+            </a>
+            <a href="{{ url_for('admin.manage_users') }}" class="nav-link {% if request.endpoint == 'admin.manage_users' %}active{% endif %}">
+                <i class="bi bi-people"></i> Users
+            </a>
+            <a href="{{ url_for('admin.view_bookings') }}" class="nav-link {% if request.endpoint == 'admin.view_bookings' %}active{% endif %}">
+                <i class="bi bi-ticket-perforated"></i> Bookings
+            </a>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 order-2 order-md-3">
+            <span class="user-chip d-none d-sm-inline-flex">
+                <i class="bi bi-shield-check text-warning"></i> Admin
+            </span>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm btn-pill">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </div>
+</nav>
+
+<main class="portal-container">
+    <div class="container">
+        {% block admin_content %}{% endblock %}
+    </div>
+</main>
+
+<footer class="py-4 border-top text-center text-muted small bg-white mt-auto">
+    <div class="container">
+        &copy; 2026 TrailMate Management Console &bull; Internal Operations
+    </div>
+</footer>
 {% endblock %}

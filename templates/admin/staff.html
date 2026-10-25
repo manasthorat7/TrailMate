@@ -1,57 +1,107 @@
 {% extends "admin/admin_layout.html" %}
-{% block title %}Manage Staff{% endblock %}
+{% block title %}Manage Staff Guides &bull; TrailMate{% endblock %}
+
 {% block admin_content %}
-<h3 class="page-title">Staff</h3>
-<p class="page-subtitle">Approve staff requests and manage active staff accounts.</p>
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h1 class="page-header-title">Mountain Guides & Staff</h1>
+        <p class="page-header-subtitle">Approve incoming guide applications, monitor statuses, and manage account access.</p>
+    </div>
+</div>
 
-<form method="GET" class="row g-2 filter-box">
-    <div class="col-md-5">
-        <input type="text" name="search" class="form-control" value="{{ search }}" placeholder="Search staff name or email">
-    </div>
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-orange w-100">Search</button>
-    </div>
-    <div class="col-md-2">
-        <a href="{{ url_for('admin.manage_staff') }}" class="btn btn-outline-light w-100">Clear</a>
-    </div>
-</form>
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <form method="GET" class="row g-2 align-items-center">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-light text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" class="form-control" value="{{ search }}" placeholder="Search by staff name or email...">
+            </div>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">
+                <i class="bi bi-search"></i> Search
+            </button>
+            {% if search %}
+            <a href="{{ url_for('admin.manage_staff') }}" class="btn btn-outline-secondary" title="Clear Search">
+                <i class="bi bi-x-lg"></i> Clear
+            </a>
+            {% endif %}
+        </div>
+        <div class="col-md-3 text-md-end text-muted small">
+            Total {{ staff_list|length }} Guide(s)
+        </div>
+    </form>
+</div>
 
-<div class="table-box">
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for staff in staff_list %}
-            <tr>
-                <td>{{ staff.name }}</td>
-                <td>{{ staff.email }}</td>
-                <td><span class="status-badge status-{{ staff.status|lower }}">{{ staff.status }}</span></td>
-                <td>
-                    <form method="POST" class="d-inline">
-                        <input type="hidden" name="staff_id" value="{{ staff.id }}">
-                        {% if staff.status == 'Pending' %}
-                            <button type="submit" name="action" value="approve" class="btn btn-sm btn-success">Approve</button>
-                            <button type="submit" name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
-                        {% elif staff.status == 'Active' %}
-                            <button type="submit" name="action" value="deactivate" class="btn btn-sm btn-outline-danger">Blacklist</button>
-                        {% else %}
-                            <button type="submit" name="action" value="activate" class="btn btn-sm btn-outline-success">Activate</button>
-                        {% endif %}
-                    </form>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="4" class="text-center text-muted">No staff found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="content-panel">
+    <div class="panel-header">
+        <h5 class="panel-title"><i class="bi bi-person-badge text-success me-2"></i> Staff Roster</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="tm-table">
+            <thead>
+                <tr>
+                    <th>Guide Name</th>
+                    <th>Email Address</th>
+                    <th>Contact Details</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for staff in staff_list %}
+                <tr>
+                    <td>
+                        <div class="fw-bold text-dark fs-6">{{ staff.name }}</div>
+                        <div class="small text-muted">ID: #{{ staff.id }}</div>
+                    </td>
+                    <td>
+                        <a href="mailto:{{ staff.email }}" class="text-decoration-none text-secondary">
+                            <i class="bi bi-envelope"></i> {{ staff.email }}
+                        </a>
+                    </td>
+                    <td>
+                        <span class="small text-muted">{{ staff.contact_details or '&mdash;' }}</span>
+                    </td>
+                    <td>
+                        <span class="badge-status status-{{ staff.status|lower }}">{{ staff.status }}</span>
+                    </td>
+                    <td class="text-end">
+                        <form method="POST" class="d-inline">
+                            <input type="hidden" name="staff_id" value="{{ staff.id }}">
+                            {% if staff.status == 'Pending' %}
+                                <button type="submit" name="action" value="approve" class="btn btn-sm btn-success px-3 me-1">
+                                    <i class="bi bi-check-lg"></i> Approve
+                                </button>
+                                <button type="submit" name="action" value="reject" class="btn btn-sm btn-outline-danger px-3">
+                                    <i class="bi bi-x-lg"></i> Reject
+                                </button>
+                            {% elif staff.status == 'Active' %}
+                                <button type="submit" name="action" value="deactivate" class="btn btn-sm btn-outline-danger" onsubmit="return confirm('Blacklist this staff account?');">
+                                    <i class="bi bi-slash-circle"></i> Deactivate
+                                </button>
+                            {% else %}
+                                <button type="submit" name="action" value="activate" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-check-circle"></i> Activate
+                                </button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-5">
+                        <div class="empty-state">
+                            <i class="bi bi-person-x empty-state-icon"></i>
+                            <h5 class="empty-state-title">No Staff Members Found</h5>
+                            <p class="empty-state-text">No guide applications match your query.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

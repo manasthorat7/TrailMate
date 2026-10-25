@@ -1,49 +1,72 @@
 {% extends "staff/staff_layout.html" %}
-{% block title %}Assigned Treks{% endblock %}
+{% block title %}My Assigned Treks &bull; TrailMate{% endblock %}
+
 {% block staff_content %}
-<h3 class="page-title">My Assigned Treks</h3>
-<p class="page-subtitle">Update slots and trek status from here.</p>
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h1 class="page-header-title">My Assigned Expeditions</h1>
+        <p class="page-header-subtitle">Update live slot capacity and advance expedition statuses as trips commence.</p>
+    </div>
+</div>
 
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for trek in treks %}
+    {% set trek_img = 'images/trek_lake.jpg' if ('Lake' in trek.trek_name or 'Roopkund' in trek.trek_name) else ('images/trek_forest.jpg' if ('Valley' in trek.trek_name or 'Flower' in trek.trek_name or 'Fort' in trek.trek_name or 'Trail' in trek.trek_name or 'Triund' in trek.trek_name) else ('images/trek_summit.jpg' if ('Summit' in trek.trek_name or 'K2' in trek.trek_name or 'Kangri' in trek.trek_name) else 'images/trek_himalayas.jpg')) %}
     <div class="col">
         <div class="trek-card">
-            <div class="trek-card-img">
-                🏔
+            <div class="trek-card-media" style="height: 180px;">
+                <img src="{{ url_for('static', filename=trek_img) }}" alt="{{ trek.trek_name }}" loading="lazy">
+                <div class="trek-card-difficulty">
+                    <span class="badge-difficulty {{ trek.difficulty|lower }}">
+                        <i class="bi bi-triangle-fill"></i> {{ trek.difficulty }}
+                    </span>
+                </div>
+                <div class="trek-card-status">
+                    <span class="badge-status status-{{ trek.status|lower }}">{{ trek.status }}</span>
+                </div>
             </div>
             <div class="trek-card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="trek-card-title mb-0">{{ trek.trek_name }}</div>
-                    <span class="status-badge status-{{ trek.status|lower }}">{{ trek.status }}</span>
+                <div class="trek-card-location">
+                    <i class="bi bi-geo-alt-fill"></i> {{ trek.location }}
                 </div>
-                
-                <div class="trek-card-detail">📍 {{ trek.location }}</div>
-                <div class="trek-card-detail">📅 {{ trek.start_date }} - {{ trek.end_date }}</div>
-                
-                <form method="POST" action="{{ url_for('staff.update_status', trek_id=trek.trek_id) }}" class="mt-4 pt-3 border-top border-secondary">
+                <h4 class="trek-card-title mb-2">{{ trek.trek_name }}</h4>
+                <div class="small text-muted mb-3">
+                    <i class="bi bi-calendar3"></i> {{ trek.start_date.strftime('%b %d') }} &ndash; {{ trek.end_date.strftime('%b %d, %Y') }} ({{ trek.duration }})
+                </div>
+
+                <!-- Update Form -->
+                <form method="POST" action="{{ url_for('staff.update_status', trek_id=trek.trek_id) }}" class="p-3 rounded-3 mt-auto" style="background-color: var(--tm-bg); border: 1px solid var(--tm-border);">
                     <div class="mb-2">
-                        <label class="form-label small text-white-50 mb-1">Available Slots</label>
-                        <input type="number" name="available_slots" value="{{ trek.available_slots }}" min="0" class="form-control">
+                        <label class="form-label small mb-1" for="slots-{{ trek.trek_id }}">Available Slots</label>
+                        <input type="number" id="slots-{{ trek.trek_id }}" name="available_slots" value="{{ trek.available_slots }}" min="0" class="form-control form-control-sm" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small text-white-50 mb-1">Status</label>
-                        <select name="status" class="form-select">
+                        <label class="form-label small mb-1" for="status-{{ trek.trek_id }}">Expedition Status</label>
+                        <select id="status-{{ trek.trek_id }}" name="status" class="form-select form-select-sm" required>
                             <option value="Open" {% if trek.status == 'Open' %}selected{% endif %}>Open</option>
                             <option value="Started" {% if trek.status == 'Started' %}selected{% endif %}>Started</option>
                             <option value="Completed" {% if trek.status == 'Completed' %}selected{% endif %}>Completed</option>
                         </select>
                     </div>
-                    <div class="d-flex gap-2 mt-auto">
-                        <button type="submit" class="btn btn-orange flex-grow-1">Update</button>
-                        <a href="{{ url_for('staff.participants', trek_id=trek.trek_id) }}" class="btn btn-outline-light">Participants</a>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                            <i class="bi bi-check2"></i> Update
+                        </button>
+                        <a href="{{ url_for('staff.participants', trek_id=trek.trek_id) }}" class="btn btn-outline-secondary btn-sm" title="View Participant Roster">
+                            <i class="bi bi-people"></i> Roster
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
     {% else %}
-    <div class="col-12 text-center text-white-50">
-        No treks assigned yet.
+    <div class="col-12 py-5">
+        <div class="empty-state content-panel">
+            <i class="bi bi-compass empty-state-icon"></i>
+            <h4 class="empty-state-title">No Treks Assigned</h4>
+            <p class="empty-state-text">You currently do not have any mountain expeditions assigned to your guide profile by the administrator.</p>
+        </div>
     </div>
     {% endfor %}
 </div>
