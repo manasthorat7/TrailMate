@@ -96,7 +96,11 @@
                                 <div class="small text-muted">{{ booking.trek.trek_name }}</div>
                             </div>
                         </div>
-                        <span class="badge-status status-booked">Booked</span>
+                        {% set display_status, display_class = booking_display(booking) %}
+                        <div class="text-end">
+                            <span class="badge-status status-{{ display_class }}">{{ display_status }}</span>
+                            <div class="small text-muted mt-1">Payment: {{ booking.payment_status }}</div>
+                        </div>
                     </div>
                     {% else %}
                     <div class="text-center text-muted py-4">No participants booked for your treks yet.</div>

@@ -46,15 +46,28 @@
                         <span class="small text-muted">{{ booking.booking_date.strftime('%Y-%m-%d') }}</span>
                     </td>
                     <td>
-                        <span class="badge-status status-{{ booking.status|lower }}">{{ booking.status }}</span>
+                        {% set display_status, display_class = booking_display(booking) %}
+                        <span class="badge-status status-{{ display_class }}">{{ display_status }}</span>
+                        <div class="small text-muted mt-1">Payment: {{ booking.payment_status }}</div>
+                        {% if booking.razorpay_order_id %}
+                        <div class="small text-muted">Order: {{ booking.razorpay_order_id }}</div>
+                        {% endif %}
                     </td>
                     <td class="text-end">
-                        {% if booking.status == 'Booked' and booking.trek.status != 'Completed' and booking.trek.status != 'Started' %}
+                        {% if booking.payment_status in ['Pending', 'Unpaid', 'Failed'] and booking.status == 'Booked' and booking.razorpay_order_id %}
+                        <a href="{{ url_for('user.checkout', booking_id=booking.booking_id) }}" class="btn btn-primary btn-sm mb-1">
+                            <i class="bi bi-credit-card"></i> Pay Now
+                        </a><br>
+                        {% endif %}
+                        {% if booking.status == 'Booked' and booking.payment_status == 'Verified' and booking.trek.status != 'Completed' and booking.trek.status != 'Started' %}
                         <form method="POST" action="{{ url_for('user.cancel_booking', booking_id=booking.booking_id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel your reservation for {{ booking.trek.trek_name }}? Your slot will be released.');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-outline-danger btn-sm">
                                 <i class="bi bi-x-circle"></i> Cancel
                             </button>
                         </form>
+                        {% elif booking.status == 'Booked' and booking.payment_status in ['Pending', 'Unpaid', 'Failed'] %}
+                        <span class="small text-muted">Pay to confirm</span>
                         {% else %}
                             <span class="small text-muted">No actions</span>
                         {% endif %}

@@ -5,7 +5,7 @@
 <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
     <div>
         <h1 class="page-header-title">{% if trek %}Edit Expedition{% else %}Schedule New Expedition{% endif %}</h1>
-        <p class="page-header-subtitle">{% if trek %}Update itinerary details, staff assignment, and slot capacity.{% else %}Create a new scheduled mountain route with live slot allocation.{% endif %}</p>
+        <p class="page-header-subtitle">{% if trek %}Update itinerary details, staff assignment, slot capacity, and cover image.{% else %}Create a new scheduled mountain route with live slot allocation.{% endif %}</p>
     </div>
     <a href="{{ url_for('admin.manage_treks') }}" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left"></i> Back to Treks
@@ -22,7 +22,8 @@
                 </h5>
             </div>
             <div class="p-4 p-md-5">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label" for="trek_name">Trek Name</label>
@@ -61,7 +62,7 @@
                             <label class="form-label" for="available_slots">Available Slots</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light text-muted"><i class="bi bi-people"></i></span>
-                                <input type="number" class="form-control" id="available_slots" name="available_slots" min="1" value="{{ trek.available_slots if trek else '' }}" placeholder="e.g. 25" required>
+                                <input type="number" class="form-control" id="available_slots" name="available_slots" min="{% if trek %}0{% else %}1{% endif %}" value="{{ trek.available_slots if trek else '' }}" placeholder="e.g. 25" required>
                             </div>
                         </div>
 
@@ -103,6 +104,69 @@
                                 <input type="date" class="form-control" id="end_date" name="end_date" value="{{ trek.end_date if trek else '' }}" required>
                             </div>
                         </div>
+
+                        {# ---- Trek Cover Image -------------------------------------------------- #}
+                        <div class="col-12">
+                            <hr class="my-2">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-image text-success me-1"></i> Trek Cover Image
+                                {% if cloudinary_configured %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle ms-1 small">Cloudinary Active</span>
+                                {% else %}
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle ms-1 small">Cloudinary Not Configured</span>
+                                {% endif %}
+                            </label>
+
+                            {% if trek and trek.image_url %}
+                            {# Current image preview #}
+                            <div class="mb-3">
+                                <div class="position-relative d-inline-block rounded-3 overflow-hidden shadow-sm" style="max-width: 340px;">
+                                    <img src="{{ trek.image_url }}" alt="Current trek image" class="img-fluid d-block rounded-3" style="max-height: 200px; object-fit: cover; width: 340px;">
+                                    <div class="position-absolute bottom-0 start-0 end-0 px-3 py-2"
+                                         style="background: linear-gradient(to top, rgba(0,0,0,.55), transparent);">
+                                        <span class="text-white small"><i class="bi bi-cloud-check"></i> Current Cloudinary image</span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <form method="POST" action="{{ url_for('admin.remove_trek_image', trek_id=trek.trek_id) }}" class="d-inline"
+                                          onsubmit="return confirm('Remove the current image? The trek will revert to the local fallback.');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash"></i> Remove Image
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% elif trek %}
+                            <div class="mb-2 p-3 rounded-3 border border-dashed text-muted small d-flex align-items-center gap-2"
+                                 style="border-style: dashed !important; background: var(--tm-bg);">
+                                <i class="bi bi-image fs-5 text-muted"></i>
+                                <span>No custom image uploaded — using local fallback image.</span>
+                            </div>
+                            {% endif %}
+
+                            {% if cloudinary_configured %}
+                            <div class="mb-1">
+                                <input type="file" class="form-control" id="trek_image" name="trek_image"
+                                       accept=".jpg,.jpeg,.png,.webp" aria-describedby="imageHelp">
+                                <div id="imageHelp" class="form-text">
+                                    <i class="bi bi-info-circle"></i>
+                                    Accepted formats: JPEG, PNG, WebP. Maximum size: 5 MB.
+                                    {% if trek and trek.image_url %}Uploading a new file will replace the current image.{% endif %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-warning border-0 py-2 px-3 rounded-3 small d-flex align-items-start gap-2">
+                                <i class="bi bi-exclamation-triangle-fill text-warning flex-shrink-0 mt-1"></i>
+                                <div>
+                                    Cloudinary is not configured. Image uploads are disabled.
+                                    Set <code>CLOUDINARY_CLOUD_NAME</code>, <code>CLOUDINARY_API_KEY</code>,
+                                    and <code>CLOUDINARY_API_SECRET</code> environment variables to enable uploads.
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {# ---- End Trek Cover Image --------------------------------------------- #}
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">

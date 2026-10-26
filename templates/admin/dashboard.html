@@ -106,7 +106,9 @@
                             <td>{{ booking.trek.trek_name }}</td>
                             <td class="small text-muted">{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
                             <td>
-                                <span class="badge-status status-{{ booking.status|lower }}">{{ booking.status }}</span>
+                                {% set display_status, display_class = booking_display(booking) %}
+                                <span class="badge-status status-{{ display_class }}">{{ display_status }}</span>
+                                <div class="small text-muted mt-1">Payment: {{ booking.payment_status }}</div>
                             </td>
                         </tr>
                         {% else %}

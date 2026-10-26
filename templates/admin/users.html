@@ -69,6 +69,7 @@
                     </td>
                     <td class="text-end">
                         <form method="POST" action="{{ url_for('admin.update_user_status', user_id=user.id) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             {% if user.status == 'Active' %}
                                 <button type="submit" name="action" value="deactivate" class="btn btn-sm btn-outline-danger" onsubmit="return confirm('Blacklist {{ user.name }}?');">
                                     <i class="bi bi-slash-circle"></i> Blacklist

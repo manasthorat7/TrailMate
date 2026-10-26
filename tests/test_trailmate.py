@@ -7,6 +7,7 @@ safe administrator provisioning, password hashing, role authorization, and workf
 import os
 import unittest
 from datetime import date, timedelta
+from unittest.mock import patch
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import create_app, init_db, normalize_database_url
@@ -319,11 +320,15 @@ class TrailMateTestCase(unittest.TestCase):
     # ---------------------------------------------------------
 
     def test_unauthenticated_access_blocked(self):
-        """Verify unauthenticated requests to protected dashboards redirect to login."""
-        for path in ['/admin/dashboard', '/staff/dashboard', '/user/dashboard']:
+        """Verify protected portals redirect to login while the catalogue is public."""
+        for path in ['/admin/dashboard', '/staff/dashboard']:
             resp = self.client.get(path)
             self.assertEqual(resp.status_code, 302)
             self.assertIn('/login', resp.headers['Location'])
+
+        public_resp = self.client.get('/user/dashboard')
+        self.assertEqual(public_resp.status_code, 200)
+        self.assertIn(b'Browse Treks', public_resp.data)
 
     def test_user_cannot_access_admin_or_staff(self):
         """Verify regular user cannot access admin or staff portals."""
@@ -341,8 +346,8 @@ class TrailMateTestCase(unittest.TestCase):
         staff_resp = self.client.get('/staff/dashboard', follow_redirects=True)
         self.assertIn(b'Staff privileges required', staff_resp.data)
 
-    def test_staff_cannot_access_admin_or_user(self):
-        """Verify staff cannot access admin portal or user portal."""
+    def test_staff_cannot_access_admin_but_can_browse_public_catalogue(self):
+        """Verify staff cannot access admin portal but can browse public treks."""
         with self.app.app_context():
             s = User(name='Staff Member', email='staff@example.com',
                      password=generate_password_hash('staff123'), role='staff', status='Active')
@@ -354,8 +359,9 @@ class TrailMateTestCase(unittest.TestCase):
         admin_resp = self.client.get('/admin/dashboard', follow_redirects=True)
         self.assertIn(b'Administrator privileges required', admin_resp.data)
 
-        user_resp = self.client.get('/user/dashboard', follow_redirects=True)
-        self.assertIn(b'Trekker account required', user_resp.data)
+        user_resp = self.client.get('/user/dashboard')
+        self.assertEqual(user_resp.status_code, 200)
+        self.assertIn(b'Browse Treks', user_resp.data)
 
     def test_admin_can_access_admin_dashboard(self):
         """Verify admin can access admin dashboard."""
@@ -374,8 +380,17 @@ class TrailMateTestCase(unittest.TestCase):
     # 6. End-to-End Workflow Tests (Trek Management & Booking)
     # ---------------------------------------------------------
 
-    def test_trek_creation_booking_and_cancellation_workflow(self):
+    @patch('razorpay_service.create_order')
+    def test_trek_creation_booking_and_cancellation_workflow(self, mock_create_order):
         """Verify end-to-end flow: admin creates trek, user books it, slot decrements, user cancels, slot increments."""
+        mock_create_order.return_value = {
+            'id': 'order_workflow', 'amount': 100000, 'currency': 'INR'
+        }
+        os.environ['RAZORPAY_KEY_ID'] = 'rzp_test_mock'
+        os.environ['RAZORPAY_KEY_SECRET'] = 'mock_secret'
+        self.addCleanup(os.environ.pop, 'RAZORPAY_KEY_ID', None)
+        self.addCleanup(os.environ.pop, 'RAZORPAY_KEY_SECRET', None)
+
         with self.app.app_context():
             admin = User(name='Admin', email='admin@trailmate.com',
                          password=generate_password_hash('admin123'), role='admin', status='Active')

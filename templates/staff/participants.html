@@ -44,11 +44,14 @@
                     </td>
                     <td class="small text-muted">{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
                     <td>
-                        <span class="badge-status status-{{ booking.status|lower }}">{{ booking.status }}</span>
+                        {% set display_status, display_class = booking_display(booking) %}
+                        <span class="badge-status status-{{ display_class }}">{{ display_status }}</span>
+                        <div class="small text-muted mt-1">Payment: {{ booking.payment_status }}</div>
                     </td>
                     <td class="text-end">
                         {% if booking.status == 'Booked' %}
                         <form method="POST" action="{{ url_for('staff.cancel_booking', booking_id=booking.booking_id) }}" class="d-inline" onsubmit="return confirm('Cancel reservation for participant {{ booking.user.name }}? The slot will be returned to available capacity.');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-outline-danger btn-sm">
                                 <i class="bi bi-x-circle"></i> Cancel
                             </button>

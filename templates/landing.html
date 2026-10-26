@@ -136,11 +136,10 @@
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for trek in treks %}
-            {% set trek_img = 'images/trek_lake.jpg' if ('Lake' in trek.trek_name or 'Roopkund' in trek.trek_name) else ('images/trek_forest.jpg' if ('Valley' in trek.trek_name or 'Flower' in trek.trek_name or 'Fort' in trek.trek_name or 'Trail' in trek.trek_name or 'Triund' in trek.trek_name) else ('images/trek_summit.jpg' if ('Summit' in trek.trek_name or 'K2' in trek.trek_name or 'Kangri' in trek.trek_name) else 'images/trek_himalayas.jpg')) %}
             <div class="col">
                 <div class="trek-card">
                     <div class="trek-card-media">
-                        <img src="{{ url_for('static', filename=trek_img) }}" alt="{{ trek.trek_name }}" loading="lazy">
+                        <img src="{{ trek_image_url(trek) }}" alt="{{ trek.trek_name }}" loading="lazy">
                         <div class="trek-card-difficulty">
                             <span class="badge-difficulty {{ trek.difficulty|lower }}">
                                 <i class="bi bi-triangle-fill"></i> {{ trek.difficulty }}

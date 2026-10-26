@@ -15,6 +15,10 @@
             </div>
 
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {% if next_url %}
+                <input type="hidden" name="next" value="{{ next_url }}">
+                {% endif %}
                 <div class="mb-3">
                     <label class="form-label" for="name">Full Name</label>
                     <div class="input-group">
@@ -66,7 +70,7 @@
                 <div class="text-center pt-2 border-top">
                     <p class="small text-muted mb-2">
                         Already have an account? 
-                        <a href="{{ url_for('auth.login') }}" class="fw-bold text-decoration-none">Sign In</a>
+                        <a href="{{ url_for('auth.login', next=next_url) if next_url else url_for('auth.login') }}" class="fw-bold text-decoration-none">Sign In</a>
                     </p>
                     <a href="{{ url_for('auth.index') }}" class="small text-secondary text-decoration-none">
                         <i class="bi bi-arrow-left"></i> Return to Homepage

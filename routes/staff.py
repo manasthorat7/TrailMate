@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from functools import wraps
-from models import Trek, Booking
+from models import Trek, Booking, CONFIRMED_PAYMENT_STATUSES
 from database import db
 
 staff_bp = Blueprint('staff', __name__, url_prefix='/staff')
@@ -26,11 +26,13 @@ def dashboard():
     open_count = sum(1 for trek in assigned if trek.status == 'Open')
     total_participants = Booking.query.join(Trek).filter(
         Trek.assigned_staff_id == current_user.id,
-        Booking.status == 'Booked'
+        Booking.status == 'Booked',
+        Booking.payment_status.in_(CONFIRMED_PAYMENT_STATUSES),
     ).count()
     recent_bookings = Booking.query.join(Trek).filter(
         Trek.assigned_staff_id == current_user.id,
-        Booking.status == 'Booked'
+        Booking.status == 'Booked',
+        Booking.payment_status.in_(CONFIRMED_PAYMENT_STATUSES),
     ).order_by(Booking.booking_date.desc()).limit(5).all()
     return render_template('staff/dashboard.html',
                            total_assigned=total_assigned,
@@ -69,9 +71,11 @@ def update_status(trek_id):
         flash('Available slots cannot be negative.', 'danger')
         return redirect(url_for('staff.assigned_treks'))
 
-    booked_count = Booking.query.filter_by(trek_id=trek.trek_id, status='Booked').count()
-    if slots < booked_count:
-        flash('Slots cannot be less than current confirmed bookings.', 'danger')
+    # Count all active reservations (pending and verified) because each one
+    # currently holds a slot. Payment status does not free capacity by itself.
+    reserved_count = Booking.query.filter_by(trek_id=trek.trek_id, status='Booked').count()
+    if slots < reserved_count:
+        flash('Slots cannot be less than current active reservations.', 'danger')
         return redirect(url_for('staff.assigned_treks'))
 
     if new_status in ['Open', 'Started', 'Completed']:
@@ -93,7 +97,11 @@ def participants(trek_id):
     if trek.assigned_staff_id != current_user.id:
         flash('Unauthorized. You can only view participants for your own treks.', 'danger')
         return redirect(url_for('staff.assigned_treks'))
-    bookings = Booking.query.filter(Booking.trek_id == trek_id, Booking.status.in_(['Booked', 'Completed'])).all()
+    bookings = Booking.query.filter(
+        Booking.trek_id == trek_id,
+        Booking.status.in_(['Booked', 'Completed']),
+        Booking.payment_status.in_(CONFIRMED_PAYMENT_STATUSES),
+    ).all()
     return render_template('staff/participants.html', trek=trek, bookings=bookings)
 
 
@@ -107,10 +115,28 @@ def cancel_booking(booking_id):
         flash('Unauthorized. You can only manage participants for your own treks.', 'danger')
         return redirect(url_for('staff.assigned_treks'))
     
-    if booking.status == 'Booked':
-        booking.status = 'Cancelled'
-        trek.available_slots += 1
+    if booking.status != 'Booked':
+        flash('This booking is already cancelled or completed.', 'warning')
+        return redirect(url_for('staff.participants', trek_id=trek.trek_id))
+
+    try:
+        claimed = Booking.query.filter_by(
+            booking_id=booking.booking_id,
+            status='Booked',
+        ).update({Booking.status: 'Cancelled'}, synchronize_session=False)
+
+        if claimed:
+            Trek.query.filter_by(trek_id=trek.trek_id).update({
+                Trek.available_slots: Trek.available_slots + 1
+            }, synchronize_session=False)
         db.session.commit()
+    except Exception:
+        db.session.rollback()
+        flash('Unable to cancel this participant right now. Please try again.', 'danger')
+        return redirect(url_for('staff.participants', trek_id=trek.trek_id))
+
+    if claimed:
         flash('Participant booking cancelled successfully.', 'success')
-    
+    else:
+        flash('This booking is already cancelled or completed.', 'warning')
     return redirect(url_for('staff.participants', trek_id=trek.trek_id))

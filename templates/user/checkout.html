@@ -1,0 +1,184 @@
+{% extends "user/user_layout.html" %}
+{% block title %}Complete Payment &bull; TrailMate{% endblock %}
+
+{% block user_content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-header-title">Complete Payment</h1>
+        <p class="page-header-subtitle">Secure Razorpay checkout for your reserved trek slot.</p>
+    </div>
+</div>
+
+<div class="row g-4 align-items-start">
+    <!-- Main column: booking summary and price breakdown -->
+    <div class="col-lg-8">
+        <section class="content-panel p-4 p-md-5 mb-4 shadow-sm">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3 mb-4">
+                <div>
+                    <span class="badge badge-status status-open mb-2">
+                        <i class="bi bi-receipt"></i> Booking Summary
+                    </span>
+                    <h2 class="fw-bold mb-1" style="color: var(--tm-text);">
+                        {{ trek.trek_name if trek else 'Trek Booking' }}
+                    </h2>
+                    {% if trek %}
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-geo-alt-fill text-danger"></i> {{ trek.location }}
+                    </p>
+                    {% endif %}
+                </div>
+                {% if trek %}
+                <div class="rounded-3 overflow-hidden shadow-sm" style="width: 180px; max-width: 100%; flex-shrink: 0;">
+                    <img src="{{ trek_image_url(trek) }}" alt="{{ trek.trek_name }}"
+                         class="w-100" style="height: 120px; object-fit: cover;">
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="row g-3 mb-4">
+                {% if trek %}
+                <div class="col-sm-6 col-md-3">
+                    <div class="small text-muted"><i class="bi bi-calendar-event"></i> Departure</div>
+                    <div class="fw-semibold text-dark">{{ trek.start_date.strftime('%b %d, %Y') }}</div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="small text-muted"><i class="bi bi-flag"></i> Return</div>
+                    <div class="fw-semibold text-dark">{{ trek.end_date.strftime('%b %d, %Y') }}</div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="small text-muted"><i class="bi bi-clock"></i> Duration</div>
+                    <div class="fw-semibold text-dark">{{ trek.duration }}</div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="small text-muted"><i class="bi bi-person-badge"></i> Guide</div>
+                    <div class="fw-semibold text-dark">{{ trek.assigned_staff.name if trek and trek.assigned_staff else 'Wilderness Guide' }}</div>
+                </div>
+                {% endif %}
+                <div class="col-sm-6 col-md-3">
+                    <div class="small text-muted"><i class="bi bi-hash"></i> Booking ID</div>
+                    <div class="fw-semibold text-dark">#{{ booking.booking_id }}</div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="small text-muted"><i class="bi bi-receipt"></i> Order Reference</div>
+                    <div class="fw-semibold text-dark text-break">{{ booking.razorpay_order_id }}</div>
+                </div>
+            </div>
+
+            <hr style="border-color: var(--tm-border-light);">
+
+            <h5 class="fw-bold mb-3">Price Breakdown</h5>
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom" style="border-color: var(--tm-border-light) !important;">
+                <span class="text-secondary">Trek booking amount</span>
+                <span class="fw-semibold text-dark">{{ booking.currency }} {{ "%.2f"|format(booking.amount) }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-3">
+                <span class="fw-bold text-dark">Total payable</span>
+                <span class="fw-bold fs-5" style="color: var(--tm-primary);">
+                    {{ booking.currency }} {{ "%.2f"|format(booking.amount) }}
+                </span>
+            </div>
+            <p class="small text-muted mb-0">
+                <i class="bi bi-info-circle"></i>
+                This is the fixed booking amount configured by TrailMate. No additional fees or taxes are added to this total.
+            </p>
+        </section>
+
+        <section class="content-panel p-4 shadow-sm">
+            <h5 class="fw-bold mb-2">Payment Status</h5>
+            <p class="text-muted small mb-0">
+                Your slot is currently reserved. The booking is confirmed only after TrailMate verifies the Razorpay payment on the server.
+                If payment is not completed, the reservation expires automatically after the configured pending-payment period.
+            </p>
+        </section>
+    </div>
+
+    <!-- Side column: payment action and trust information -->
+    <div class="col-lg-4">
+        <aside class="content-panel p-4 shadow-sm position-sticky" style="top: 90px;">
+            <h4 class="fw-bold mb-1 text-dark">Payment Summary</h4>
+            <p class="small text-muted mb-3">Review the amount, then complete payment securely.</p>
+
+            <div class="p-3 rounded-3 mb-4" style="background-color: var(--tm-bg); border: 1px solid var(--tm-border);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold text-dark">Amount payable</span>
+                    <span class="badge bg-success-subtle text-success fs-6 fw-bold px-3">
+                        {{ booking.currency }} {{ "%.2f"|format(booking.amount) }}
+                    </span>
+                </div>
+                <div class="small text-muted">
+                    <i class="bi bi-lightning-charge text-warning"></i> Slot reserved on order creation.
+                </div>
+            </div>
+
+            <button id="rzp-button" class="btn btn-primary w-100 py-3 fw-semibold fs-6 mb-3">
+                <i class="bi bi-credit-card"></i> Pay Securely
+                <span class="ms-2">{{ booking.currency }} {{ "%.2f"|format(booking.amount) }}</span>
+            </button>
+
+            <div class="text-center mb-3">
+                {% if razorpay_key_id.startswith('rzp_test_') %}
+                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                    <i class="bi bi-flask"></i> Razorpay Test Mode
+                </span>
+                <p class="small text-muted mt-2 mb-0">
+                    This is a test payment. No real charge will be made.
+                </p>
+                {% else %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                    <i class="bi bi-shield-check"></i> Secure Razorpay Checkout
+                </span>
+                {% endif %}
+            </div>
+
+            <ul class="list-unstyled small text-muted d-flex flex-column gap-2 mb-0">
+                <li class="d-flex align-items-start gap-2">
+                    <i class="bi bi-shield-lock text-success mt-1"></i>
+                    <span>Payment details are handled by Razorpay; TrailMate does not store card data.</span>
+                </li>
+                <li class="d-flex align-items-start gap-2">
+                    <i class="bi bi-check2-circle text-success mt-1"></i>
+                    <span>Your booking is confirmed only after server-side signature verification.</span>
+                </li>
+                <li class="d-flex align-items-start gap-2">
+                    <i class="bi bi-arrow-counterclockwise text-success mt-1"></i>
+                    <span>Eligible bookings can be cancelled before departure.</span>
+                </li>
+            </ul>
+
+            <form id="payment-form" action="{{ url_for('user.verify_payment') }}" method="POST" class="d-none">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="razorpay_order_id" id="razorpay_order_id" value="{{ booking.razorpay_order_id }}">
+                <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+                <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+            </form>
+        </aside>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+var options = {
+    "key": "{{ razorpay_key_id }}",
+    "amount": "{{ (booking.amount * 100) | int }}",
+    "currency": "{{ booking.currency }}",
+    "name": "TrailMate",
+    "description": "Trek Booking",
+    "order_id": "{{ booking.razorpay_order_id }}",
+    "handler": function (response){
+        document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+        document.getElementById('razorpay_signature').value = response.razorpay_signature;
+        document.getElementById('payment-form').submit();
+    },
+    "theme": {
+        "color": "#183727"
+    }
+};
+var rzp1 = new Razorpay(options);
+document.getElementById('rzp-button').onclick = function(e){
+    rzp1.open();
+    e.preventDefault();
+}
+</script>
+{% endblock %}

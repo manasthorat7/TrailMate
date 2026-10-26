@@ -10,14 +10,12 @@
     </ol>
 </nav>
 
-{% set trek_img = 'images/trek_lake.jpg' if ('Lake' in trek.trek_name or 'Roopkund' in trek.trek_name) else ('images/trek_forest.jpg' if ('Valley' in trek.trek_name or 'Flower' in trek.trek_name or 'Fort' in trek.trek_name or 'Trail' in trek.trek_name or 'Triund' in trek.trek_name) else ('images/trek_summit.jpg' if ('Summit' in trek.trek_name or 'K2' in trek.trek_name or 'Kangri' in trek.trek_name) else 'images/trek_himalayas.jpg')) %}
-
 <div class="row g-4">
     <!-- Left Column: Photography & Expedition Details -->
     <div class="col-lg-8">
         <div class="content-panel mb-4 overflow-hidden">
             <div class="position-relative" style="height: 380px;">
-                <img src="{{ url_for('static', filename=trek_img) }}" alt="{{ trek.trek_name }}" class="w-100 h-100 object-fit-cover">
+                <img src="{{ trek_image_url(trek) }}" alt="{{ trek.trek_name }}" class="w-100 h-100 object-fit-cover">
                 <div class="position-absolute top-0 start-0 m-3">
                     <span class="badge-difficulty {{ trek.difficulty|lower }} shadow-sm">
                         <i class="bi bi-triangle-fill"></i> {{ trek.difficulty }} Grade
@@ -95,18 +93,8 @@
                 </div>
             </div>
 
-            {% if has_booked %}
-                <div class="alert alert-info border-0 rounded-3 d-flex align-items-start gap-2 mb-3">
-                    <i class="bi bi-check-circle-fill text-info fs-5 flex-shrink-0"></i>
-                    <div>
-                        <div class="fw-bold">Already Reserved</div>
-                        <div class="small">You have an active reservation for this trek.</div>
-                    </div>
-                </div>
-                <a href="{{ url_for('user.my_bookings') }}" class="btn btn-outline-primary w-100">
-                    <i class="bi bi-ticket-perforated"></i> View in My Bookings
-                </a>
-            {% elif trek.status != 'Open' or trek.available_slots <= 0 %}
+            {% set next_url = url_for('user.trek_details', trek_id=trek.trek_id) %}
+            {% if trek.status != 'Open' or trek.available_slots <= 0 %}
                 <div class="alert alert-warning border-0 rounded-3 d-flex align-items-start gap-2 mb-3">
                     <i class="bi bi-exclamation-triangle-fill text-warning fs-5 flex-shrink-0"></i>
                     <div>
@@ -117,13 +105,55 @@
                 <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary w-100">
                     <i class="bi bi-compass"></i> Explore Other Treks
                 </a>
+            {% elif not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.login', next=next_url) }}" class="btn btn-primary w-100 py-2 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right"></i> Book This Trek
+                </a>
+                <div class="text-center mt-3">
+                    <span class="small text-muted">
+                        New to TrailMate?
+                        <a href="{{ url_for('auth.register', next=next_url) }}" class="fw-bold text-decoration-none">Create a free account</a>
+                    </span>
+                </div>
+            {% elif current_user.role != 'user' %}
+                <div class="alert alert-info border-0 rounded-3 d-flex align-items-start gap-2 mb-3">
+                    <i class="bi bi-person-badge-fill text-info fs-5 flex-shrink-0"></i>
+                    <div>
+                        <div class="fw-bold">Trekker Account Required</div>
+                        <div class="small">Staff and administrator accounts cannot reserve trekker slots.</div>
+                    </div>
+                </div>
+                {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-speedometer2"></i> Return to Admin Panel
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('staff.dashboard') }}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-compass"></i> Return to Guide Portal
+                    </a>
+                {% endif %}
+            {% elif has_booked %}
+                <div class="alert alert-info border-0 rounded-3 d-flex align-items-start gap-2 mb-3">
+                    <i class="bi bi-check-circle-fill text-info fs-5 flex-shrink-0"></i>
+                    <div>
+                        <div class="fw-bold">Already Reserved</div>
+                        <div class="small">You have an active reservation/pending payment for this trek.</div>
+                    </div>
+                </div>
+                <a href="{{ url_for('user.my_bookings') }}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-ticket-perforated"></i> View in My Bookings
+                </a>
             {% else %}
                 <form method="POST" action="{{ url_for('user.book_trek', trek_id=trek.trek_id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="small text-muted mb-3">
+                        <i class="bi bi-info-circle"></i> Payment required via Razorpay (test mode). Slot reserved on order creation.
+                    </div>
                     <div class="small text-muted mb-3">
                         By confirming, 1 slot will be reserved under your account: <strong>{{ current_user.email }}</strong>.
                     </div>
-                    <button type="submit" class="btn btn-accent w-100 py-3 fs-6">
-                        <i class="bi bi-check2-circle"></i> Confirm Booking
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                        <i class="bi bi-credit-card"></i> Proceed to Payment
                     </button>
                 </form>
                 <div class="text-center mt-3">

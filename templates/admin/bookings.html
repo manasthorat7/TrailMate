@@ -46,7 +46,9 @@
                         <span class="small text-muted">{{ booking.booking_date.strftime('%Y-%m-%d %H:%M') if booking.booking_date else '&mdash;' }}</span>
                     </td>
                     <td class="text-end">
-                        <span class="badge-status status-{{ booking.status|lower }}">{{ booking.status }}</span>
+                        {% set display_status, display_class = booking_display(booking) %}
+                        <span class="badge-status status-{{ display_class }}">{{ display_status }}</span>
+                        <div class="small text-muted mt-1">Payment: {{ booking.payment_status }}</div>
                     </td>
                 </tr>
                 {% else %}

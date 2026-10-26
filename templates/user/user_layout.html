@@ -7,31 +7,52 @@
                 <i class="bi bi-compass-fill logo-icon"></i>
                 <span class="logo-trail">Trail</span><span class="logo-mate">Mate</span>
             </a>
-            <span class="portal-badge d-none d-sm-inline-block">Trekker Portal</span>
+            <span class="portal-badge d-none d-sm-inline-block">
+                {% if current_user.is_authenticated %}Trekker Portal{% else %}Trail Discovery{% endif %}
+            </span>
         </div>
 
         <div class="d-flex align-items-center flex-wrap gap-1 order-3 order-md-2 mt-2 mt-md-0">
-            <a href="{{ url_for('user.dashboard') }}" class="nav-link {% if request.endpoint == 'user.dashboard' %}active{% endif %}">
+            <a href="{{ url_for('user.dashboard') }}" class="nav-link {% if request.endpoint in ['user.dashboard', 'user.trek_details'] %}active{% endif %}">
                 <i class="bi bi-compass"></i> Browse Treks
             </a>
-            <a href="{{ url_for('user.my_bookings') }}" class="nav-link {% if request.endpoint == 'user.my_bookings' %}active{% endif %}">
-                <i class="bi bi-ticket-perforated"></i> My Bookings
-            </a>
-            <a href="{{ url_for('user.history') }}" class="nav-link {% if request.endpoint == 'user.history' %}active{% endif %}">
-                <i class="bi bi-clock-history"></i> History
-            </a>
-            <a href="{{ url_for('user.profile') }}" class="nav-link {% if request.endpoint == 'user.profile' %}active{% endif %}">
-                <i class="bi bi-person"></i> Profile
-            </a>
+            {% if current_user.is_authenticated and current_user.role == 'user' %}
+                <a href="{{ url_for('user.my_bookings') }}" class="nav-link {% if request.endpoint == 'user.my_bookings' %}active{% endif %}">
+                    <i class="bi bi-ticket-perforated"></i> My Bookings
+                </a>
+                <a href="{{ url_for('user.history') }}" class="nav-link {% if request.endpoint == 'user.history' %}active{% endif %}">
+                    <i class="bi bi-clock-history"></i> History
+                </a>
+                <a href="{{ url_for('user.profile') }}" class="nav-link {% if request.endpoint == 'user.profile' %}active{% endif %}">
+                    <i class="bi bi-person"></i> Profile
+                </a>
+            {% elif current_user.is_authenticated and current_user.role == 'admin' %}
+                <a href="{{ url_for('admin.dashboard') }}" class="nav-link">
+                    <i class="bi bi-speedometer2"></i> Admin Panel
+                </a>
+            {% elif current_user.is_authenticated and current_user.role == 'staff' %}
+                <a href="{{ url_for('staff.dashboard') }}" class="nav-link">
+                    <i class="bi bi-compass"></i> Guide Portal
+                </a>
+            {% endif %}
         </div>
 
         <div class="d-flex align-items-center gap-2 order-2 order-md-3">
-            <span class="user-chip d-none d-sm-inline-flex">
-                <i class="bi bi-person-circle"></i> {{ current_user.name }}
-            </span>
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm btn-pill">
-                <i class="bi bi-box-arrow-right"></i> Logout
-            </a>
+            {% if current_user.is_authenticated %}
+                <span class="user-chip d-none d-sm-inline-flex">
+                    <i class="bi bi-person-circle"></i> {{ current_user.name }}
+                </span>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm btn-pill">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.login', next=request.full_path.rstrip('?')) }}" class="nav-link">
+                    <i class="bi bi-person"></i> Sign In
+                </a>
+                <a href="{{ url_for('auth.register', next=request.full_path.rstrip('?')) }}" class="btn btn-accent btn-sm btn-pill">
+                    <i class="bi bi-backpack"></i> Join as Trekker
+                </a>
+            {% endif %}
         </div>
     </div>
 </nav>

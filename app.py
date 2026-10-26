@@ -1,6 +1,6 @@
 import os
 import click
-from flask import Flask, request
+from flask import Flask, request, url_for, redirect, flash
 from dotenv import load_dotenv
 from database import db
 
@@ -178,6 +178,10 @@ def create_app(test_config=None, db_name='trekking.db'):
 
     db.init_app(app)
 
+    # CSRF protection via Flask-WTF
+    from flask_wtf.csrf import CSRFProtect
+    csrf = CSRFProtect(app)
+
     from flask_login import LoginManager
     from models import User
 
@@ -190,6 +194,24 @@ def create_app(test_config=None, db_name='trekking.db'):
     def load_user(user_id):
         return User.query.get(int(user_id))
 
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        """
+        Preserve the requested local path for post-login return.
+
+        A protected booking POST cannot be replayed as a GET, so map it back to
+        the trek details page instead.
+        """
+        next_url = request.path
+        if request.query_string:
+            next_url = f"{next_url}?{request.query_string.decode('utf-8', 'ignore')}"
+        if request.endpoint == 'user.book_trek':
+            trek_id = (request.view_args or {}).get('trek_id')
+            if trek_id is not None:
+                next_url = url_for('user.trek_details', trek_id=trek_id)
+        flash(login_manager.login_message, login_manager.login_message_category)
+        return redirect(url_for('auth.login', next=next_url))
+
     from routes.auth import auth_bp
     from routes.admin import admin_bp
     from routes.staff import staff_bp
@@ -200,7 +222,55 @@ def create_app(test_config=None, db_name='trekking.db'):
     app.register_blueprint(staff_bp)
     app.register_blueprint(user_bp)
 
-    from models import Trek, Booking
+    @app.cli.command('expire-pending-bookings')
+    def expire_pending_bookings_command():
+        """Expire stale pending/unpaid/failed payments and release slots."""
+        from routes.user import _expire_pending_bookings
+
+        try:
+            expired_count = _expire_pending_bookings()
+        except Exception as exc:  # pragma: no cover - defensive CLI handling
+            click.echo(f'Failed to expire pending bookings: {exc}', err=True)
+            raise SystemExit(1)
+
+        click.echo(f'Expired {expired_count} stale pending booking(s).')
+
+    # -------------------------------------------------------------------
+    # Prefers Cloudinary URL when present; falls back to terrain-mapped
+    # local static images. Used by all trek-card and trek-detail templates.
+    # -------------------------------------------------------------------
+    def trek_image_url(trek):
+        """Return the best available image URL for a trek."""
+        if trek.image_url:
+            return trek.image_url
+        name = trek.trek_name or ''
+        if any(k in name for k in ('Lake', 'Roopkund')):
+            local = 'images/trek_lake.jpg'
+        elif any(k in name for k in ('Valley', 'Flower', 'Fort', 'Trail', 'Triund')):
+            local = 'images/trek_forest.jpg'
+        elif any(k in name for k in ('Summit', 'K2', 'Kangri')):
+            local = 'images/trek_summit.jpg'
+        else:
+            local = 'images/trek_himalayas.jpg'
+        # url_for needs an application context, which is guaranteed here
+        return url_for('static', filename=local)
+
+    app.jinja_env.globals['trek_image_url'] = trek_image_url
+
+    from models import Trek, Booking, CONFIRMED_PAYMENT_STATUSES
+
+    def booking_display(booking):
+        """
+        Return (label, css_class) for a booking.
+
+        A reservation that is not payment-verified is shown as 'Reserved'
+        rather than 'Booked' so the UI never implies a paid confirmation.
+        """
+        if booking.status == 'Booked' and booking.payment_status not in CONFIRMED_PAYMENT_STATUSES:
+            return 'Reserved', 'pending'
+        return booking.status, (booking.status or '').lower()
+
+    app.jinja_env.globals['booking_display'] = booking_display
 
     @app.before_request
     def update_trek_statuses():
