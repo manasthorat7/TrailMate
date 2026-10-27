@@ -28,7 +28,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: 'sh -c "flask --app wsgi init-db && gunicorn --bind 0.0.0.0:$PORT wsgi:app"'
+    startCommand: 'sh -c "python migrate_add_trek_price.py && flask --app wsgi init-db && gunicorn --bind 0.0.0.0:$PORT wsgi:app"'
     envVars:
       - key: DATABASE_URL
         fromDatabase:

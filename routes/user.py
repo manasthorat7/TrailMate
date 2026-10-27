@@ -89,6 +89,10 @@ def book_trek(trek_id):
     # Expire old pending orders for this user/trek to free slots
     _expire_pending_bookings()
 
+    if trek.price is None:
+        flash('Booking unavailable. This trek does not have a valid price yet.', 'danger')
+        return redirect(url_for('user.trek_details', trek_id=trek_id))
+
     if trek.status != 'Open':
         flash('Booking failed. You can only book treks that are currently open (Open).', 'danger')
         return redirect(url_for('user.trek_details', trek_id=trek_id))
@@ -126,8 +130,12 @@ def book_trek(trek_id):
                 flash('Booking failed. Trek no longer available.', 'danger')
                 return redirect(url_for('user.trek_details', trek_id=trek_id))
 
-            # Amount: use a default/test amount; can be extended later. Store server-side.
-            amount_paise = 100000  # ₹1000.00 default for test; not client-trusted
+            # Amount derived server-side from persisted Trek price (INR).
+            from decimal import Decimal
+            price = trek_locked.price
+            if price is None:
+                raise ValueError('missing trek price')
+            amount_paise = int((Decimal(str(price)) * 100).to_integral_value())
             currency = os.environ.get('PAYMENT_CURRENCY', 'INR')
 
             order = razorpay_service.create_order(
@@ -142,7 +150,7 @@ def book_trek(trek_id):
                 trek_id=trek_id,
                 status='Booked',  # will be confirmed only after verification; but we need to track payment
                 payment_status='Pending',
-                amount=amount_paise / 100.0,
+                amount=float(price),
                 currency=currency,
                 razorpay_order_id=order.get('id')
             )

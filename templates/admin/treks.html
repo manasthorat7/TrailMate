@@ -75,6 +75,9 @@
                         <i class="bi bi-people"></i> {{ trek.available_slots }} slots
                     </div>
                     <div class="trek-meta-item">
+                        <i class="bi bi-currency-rupee"></i> {{ '₹%.2f'|format(trek.price) if trek.price is not none else 'Price not set' }}
+                    </div>
+                    <div class="trek-meta-item">
                         <i class="bi bi-person-badge"></i> {{ trek.assigned_staff.name if trek.assigned_staff else 'Unassigned' }}
                     </div>
                 </div>

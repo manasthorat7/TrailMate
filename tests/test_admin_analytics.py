@@ -84,7 +84,7 @@ class AdminAnalyticsTestCase(unittest.TestCase):
             duration='5 Days',
             available_slots=2,
             assigned_staff_id=staff.id,
-            status='Open',
+            status='Open', price=1000.00,
             start_date=today + timedelta(days=10),
             end_date=today + timedelta(days=14),
         )
@@ -95,7 +95,7 @@ class AdminAnalyticsTestCase(unittest.TestCase):
             duration='3 Days',
             available_slots=10,
             assigned_staff_id=None,
-            status='Open',
+            status='Open', price=1000.00,
             start_date=today + timedelta(days=20),
             end_date=today + timedelta(days=22),
         )
@@ -117,7 +117,7 @@ class AdminAnalyticsTestCase(unittest.TestCase):
             duration='6 Days',
             available_slots=0,
             assigned_staff_id=staff.id,
-            status='Open',
+            status='Open', price=1000.00,
             start_date=today + timedelta(days=5),
             end_date=today + timedelta(days=10),
         )

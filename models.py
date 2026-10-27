@@ -44,7 +44,12 @@ class Trek(db.Model):
     image_url = db.Column(db.String(500), nullable=True)
     image_public_id = db.Column(db.String(200), nullable=True)
 
+    # Required INR price for new treks. Nullable so legacy rows created before
+    # pricing existed remain intact until an administrator sets a valid price.
+    price = db.Column(db.Numeric(10, 2), nullable=True)
+
     bookings = db.relationship('Booking', backref='trek', lazy=True)
+
 
 
 class Booking(db.Model):

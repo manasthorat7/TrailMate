@@ -7,6 +7,7 @@ from models import (
 )
 from database import db
 from datetime import datetime, date, timedelta
+from decimal import Decimal, InvalidOperation
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 import cloudinary_service
@@ -374,6 +375,7 @@ def _parse_trek_form(form, redirect_target):
     assigned_staff_id = form.get('assigned_staff_id') or None
     start_date_str = form.get('start_date')
     end_date_str = form.get('end_date')
+    price_raw = (form.get('price') or '').strip()
 
     try:
         start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
@@ -382,6 +384,23 @@ def _parse_trek_form(form, redirect_target):
     except (TypeError, ValueError):
         flash('Error: Please enter valid trek details.', 'danger')
         return None, redirect(redirect_target)
+
+    # Validate required trek price (INR), decimal, finite, positive.
+    try:
+        price = Decimal(price_raw)
+    except (InvalidOperation, ValueError, TypeError):
+        flash('Error: Please enter a valid trek price in INR.', 'danger')
+        return None, redirect(redirect_target)
+    if not price_raw or price.is_nan() or price.is_infinite():
+        flash('Error: Please enter a valid trek price in INR.', 'danger')
+        return None, redirect(redirect_target)
+    if price <= 0:
+        flash('Error: Trek price must be greater than zero.', 'danger')
+        return None, redirect(redirect_target)
+    if price > Decimal('9999999.99'):
+        flash('Error: Trek price is too large.', 'danger')
+        return None, redirect(redirect_target)
+    price = price.quantize(Decimal('0.01'))
 
     if not trek_name or not location or not duration:
         flash('Error: Trek name, location and duration are required.', 'danger')
@@ -418,6 +437,7 @@ def _parse_trek_form(form, redirect_target):
         'assigned_staff_id': resolved_staff_id,
         'start_date': start_date,
         'end_date': end_date,
+        'price': price,
     }, None
 
 
@@ -495,6 +515,7 @@ def add_trek():
             end_date=fields['end_date'],
             image_url=image_url,
             image_public_id=image_public_id,
+            price=fields['price'],
         )
 
         db.session.add(new_trek)
@@ -556,6 +577,7 @@ def edit_trek(trek_id):
         trek.status = new_status
         trek.start_date = fields['start_date']
         trek.end_date = fields['end_date']
+        trek.price = fields['price']
 
         if new_url:
             trek.image_url = new_url

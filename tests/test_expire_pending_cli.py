@@ -48,7 +48,7 @@ class ExpirePendingCliTestCase(unittest.TestCase):
                 available_slots=2,
                 start_date=date.today() + timedelta(days=5),
                 end_date=date.today() + timedelta(days=7),
-                status='Open',
+                status='Open', price=1000.00,
             )
             db.session.add(trek)
             db.session.flush()

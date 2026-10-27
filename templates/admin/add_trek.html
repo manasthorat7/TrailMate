@@ -59,7 +59,13 @@
                         </div>
 
                         <div class="col-md-4">
-                            <label class="form-label" for="available_slots">Available Slots</label>
+                            <label class="form-label" for="price">Trek Price (INR)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted">₹</span>
+                                <input type="number" step="0.01" min="0.01" class="form-control" id="price" name="price" value="{{ '%.2f'|format(trek.price) if trek and trek.price is not none else '' }}" placeholder="e.g. 4999.00" required>
+                            </div>
+                        </div>
+
                             <div class="input-group">
                                 <span class="input-group-text bg-light text-muted"><i class="bi bi-people"></i></span>
                                 <input type="number" class="form-control" id="available_slots" name="available_slots" min="{% if trek %}0{% else %}1{% endif %}" value="{{ trek.available_slots if trek else '' }}" placeholder="e.g. 25" required>

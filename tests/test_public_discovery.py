@@ -50,7 +50,7 @@ class PublicDiscoveryTestCase(unittest.TestCase):
                 available_slots=8,
                 start_date=date.today() + timedelta(days=10),
                 end_date=date.today() + timedelta(days=13),
-                status='Open',
+                status='Open', price=1000.00,
             )
             completed_trek = Trek(
                 trek_name='Old Completed Trek',

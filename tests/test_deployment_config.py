@@ -153,7 +153,7 @@ class ProductionConfigTestCase(unittest.TestCase):
             'preDeployCommand is paid-plan only and must not be used on the free plan.',
         )
         self.assertIn(
-            'startCommand: \'sh -c "flask --app wsgi init-db && gunicorn --bind 0.0.0.0:$PORT wsgi:app"\'',
+            'startCommand: \'sh -c "python migrate_add_trek_price.py && flask --app wsgi init-db && gunicorn --bind 0.0.0.0:$PORT wsgi:app"\'',
             blueprint,
         )
         self.assertIn('plan: free', blueprint)

@@ -415,6 +415,7 @@ class TrailMateTestCase(unittest.TestCase):
             'difficulty': 'Moderate',
             'duration': '6 Days',
             'available_slots': '10',
+            'price': '1000.00',
             'start_date': (date.today() + timedelta(days=20)).strftime('%Y-%m-%d'),
             'end_date': (date.today() + timedelta(days=26)).strftime('%Y-%m-%d')
         }, follow_redirects=True)

@@ -50,6 +50,10 @@
                         <div class="small text-muted"><i class="bi bi-person-badge"></i> Assigned Guide</div>
                         <div class="fw-bold fs-6 text-dark">{{ trek.assigned_staff.name if trek.assigned_staff else 'Wilderness Staff' }}</div>
                     </div>
+                    <div class="col-6 col-md-3">
+                        <div class="small text-muted"><i class="bi bi-currency-rupee"></i> Price</div>
+                        <div class="fw-bold fs-6 text-dark">{{ '₹%.2f'|format(trek.price) if trek.price is not none else 'Not set' }}</div>
+                    </div>
                 </div>
 
                 <!-- Expedition Description & Preparation Notes -->
