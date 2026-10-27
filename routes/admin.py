@@ -1,12 +1,36 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from functools import wraps
-from models import User, Trek, Booking
+from models import (
+    User, Trek, Booking, CONFIRMED_PAYMENT_STATUSES,
+    EXPIRABLE_PAYMENT_STATUSES, PAYMENT_STATUS_VERIFIED,
+)
 from database import db
-from datetime import datetime
+from datetime import datetime, date, timedelta
+from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 import cloudinary_service
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+# ---------------------------------------------------------------------------
+# Analytics configuration
+#
+# These values document the exact rules used by the dashboard. They are kept
+# here (rather than in templates) so every metric has one server-side source
+# of truth.
+# ---------------------------------------------------------------------------
+BOOKING_TREND_WINDOW_DAYS = 30   # Rolling daily window, today inclusive
+POPULAR_TREK_LIMIT = 5           # Chart C shows the top five treks
+LOW_CAPACITY_THRESHOLD = 3       # Remaining slots considered "low"
+INSIGHT_LIST_LIMIT = 5           # Rows per operational insight list
+
+# "Confirmed" means an active or completed reservation whose payment is
+# either Razorpay-verified or a pre-Razorpay legacy record.
+CONFIRMED_BOOKING_STATUSES = ('Booked', 'Completed')
+# "Pending payments" are active reservations whose payment has not been
+# verified yet (Pending / Unpaid / Failed).
+PENDING_PAYMENT_STATUSES = EXPIRABLE_PAYMENT_STATUSES
 
 
 def admin_required(f):
@@ -19,23 +43,301 @@ def admin_required(f):
     return decorated_function
 
 
+def format_currency(currency, amount):
+    """Format an amount consistently, e.g. ``INR 1,000.00``."""
+    currency = (currency or 'INR').strip() or 'INR'
+    try:
+        value = float(amount or 0)
+    except (TypeError, ValueError):
+        value = 0.0
+    return f'{currency} {value:,.2f}'
+
+
+def _as_date(value):
+    """Normalise SQL date/string results from different database dialects."""
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    try:
+        return datetime.strptime(str(value)[:10], '%Y-%m-%d').date()
+    except (TypeError, ValueError):
+        return None
+
+
+def _booking_trend(today=None):
+    """
+    Daily booking counts for the last ``BOOKING_TREND_WINDOW_DAYS`` days.
+
+    Counting rule: every booking record is counted once by its
+    ``booking_date`` (creation date), regardless of its current status. This
+    measures booking activity, not confirmed revenue.
+    """
+    today = today or date.today()
+    start_day = today - timedelta(days=BOOKING_TREND_WINDOW_DAYS - 1)
+    start_dt = datetime.combine(start_day, datetime.min.time())
+
+    rows = (
+        db.session.query(
+            func.date(Booking.booking_date).label('booking_day'),
+            func.count(Booking.booking_id),
+        )
+        .filter(Booking.booking_date >= start_dt)
+        .group_by(func.date(Booking.booking_date))
+        .all()
+    )
+
+    counts = {}
+    for day_value, count in rows:
+        day = _as_date(day_value)
+        if day is None:
+            continue
+        counts[day] = counts.get(day, 0) + int(count or 0)
+
+    labels, values = [], []
+    for offset in range(BOOKING_TREND_WINDOW_DAYS):
+        day = start_day + timedelta(days=offset)
+        labels.append(day.strftime('%b %d'))
+        values.append(counts.get(day, 0))
+
+    return {
+        'labels': labels,
+        'values': values,
+        'window_days': BOOKING_TREND_WINDOW_DAYS,
+        'start_date': start_day.isoformat(),
+        'end_date': today.isoformat(),
+        'total': int(sum(values)),
+    }
+
+
+def _booking_status_distribution():
+    """
+    Booking-status counts (Booked / Cancelled / Completed), kept separate from
+    payment status. Unknown future statuses are rendered verbatim.
+    """
+    rows = (
+        db.session.query(Booking.status, func.count(Booking.booking_id))
+        .group_by(Booking.status)
+        .all()
+    )
+
+    items = [
+        {'status': (status or 'Unknown'), 'count': int(count or 0)}
+        for status, count in rows
+    ]
+    items.sort(key=lambda item: (-item['count'], item['status']))
+
+    return {
+        'labels': [item['status'] for item in items],
+        'values': [item['count'] for item in items],
+        'total': sum(item['count'] for item in items),
+    }
+
+
+def _popular_treks(limit=POPULAR_TREK_LIMIT):
+    """
+    Top treks by booking count.
+
+    Counting rule: cancelled bookings are excluded, because the chart reflects
+    participation/demand rather than historical attempts. Ties are broken by
+    trek name for a stable ordering.
+    """
+    rows = (
+        db.session.query(
+            Trek.trek_id,
+            Trek.trek_name,
+            func.count(Booking.booking_id).label('booking_count'),
+        )
+        .join(Booking, Booking.trek_id == Trek.trek_id)
+        .filter(Booking.status != 'Cancelled')
+        .group_by(Trek.trek_id, Trek.trek_name)
+        .order_by(func.count(Booking.booking_id).desc(), Trek.trek_name.asc())
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        {
+            'trek_id': row[0],
+            'trek_name': row[1] or 'Unnamed trek',
+            'count': int(row[2] or 0),
+        }
+        for row in rows
+    ]
+
+
+def _verified_revenue():
+    """
+    Verified revenue, grouped by currency.
+
+    Only bookings whose Razorpay signature was verified are counted.
+    Pending, Unpaid, Failed and Legacy payments are excluded, and cancelled
+    bookings are excluded because refunds are not tracked by the application.
+    Amounts are the server-stored booking amount, which is the same value used
+    to create the Razorpay order.
+    """
+    rows = (
+        db.session.query(Booking.currency, func.sum(Booking.amount))
+        .filter(
+            Booking.payment_status == PAYMENT_STATUS_VERIFIED,
+            Booking.status.in_(CONFIRMED_BOOKING_STATUSES),
+            Booking.amount.isnot(None),
+        )
+        .group_by(Booking.currency)
+        .all()
+    )
+
+    breakdown = []
+    for currency, total in rows:
+        value = float(total or 0)
+        breakdown.append({
+            'currency': currency or 'INR',
+            'amount': round(value, 2),
+            'display': format_currency(currency, value),
+        })
+    breakdown.sort(key=lambda item: item['currency'])
+
+    return {
+        'breakdown': breakdown,
+        'displays': [item['display'] for item in breakdown],
+        'primary': breakdown[0]['display'] if breakdown else format_currency('INR', 0),
+        'is_empty': not breakdown,
+    }
+
+
+def _operational_insights(today=None, limit=INSIGHT_LIST_LIMIT):
+    """
+    Compact, schema-supported operational lists. No customer contact details
+    or payment secrets are exposed.
+    """
+    today = today or date.today()
+
+    upcoming_filters = (Trek.start_date > today, Trek.status != 'Completed')
+    low_capacity_filters = (
+        Trek.status == 'Open',
+        Trek.start_date > today,
+        Trek.available_slots <= LOW_CAPACITY_THRESHOLD,
+    )
+    unassigned_filters = (Trek.assigned_staff_id.is_(None), Trek.status != 'Completed')
+    pending_filters = (
+        Booking.status == 'Booked',
+        Booking.payment_status.in_(PENDING_PAYMENT_STATUSES),
+    )
+
+    upcoming_treks = (
+        Trek.query.filter(*upcoming_filters)
+        .order_by(Trek.start_date.asc(), Trek.trek_name.asc())
+        .limit(limit)
+        .all()
+    )
+    low_capacity_treks = (
+        Trek.query.filter(*low_capacity_filters)
+        .order_by(Trek.available_slots.asc(), Trek.start_date.asc())
+        .limit(limit)
+        .all()
+    )
+    unassigned_treks = (
+        Trek.query.filter(*unassigned_filters)
+        .order_by(Trek.start_date.asc(), Trek.trek_name.asc())
+        .limit(limit)
+        .all()
+    )
+    pending_bookings = (
+        Booking.query.options(joinedload(Booking.trek))
+        .filter(*pending_filters)
+        .order_by(Booking.booking_date.asc())
+        .limit(limit)
+        .all()
+    )
+
+    return {
+        'upcoming_treks': upcoming_treks,
+        'upcoming_count': Trek.query.filter(*upcoming_filters).count(),
+        'low_capacity_treks': low_capacity_treks,
+        'low_capacity_count': Trek.query.filter(*low_capacity_filters).count(),
+        'low_capacity_threshold': LOW_CAPACITY_THRESHOLD,
+        'unassigned_treks': unassigned_treks,
+        'unassigned_count': Trek.query.filter(*unassigned_filters).count(),
+        'pending_bookings': pending_bookings,
+        'pending_count': Booking.query.filter(*pending_filters).count(),
+    }
+
+
+def build_dashboard_analytics(today=None):
+    """
+    Build every dashboard metric server-side.
+
+    Metric definitions:
+      * Total bookings      - all booking records.
+      * Confirmed bookings  - status Booked/Completed with payment Verified/Legacy.
+      * Upcoming expeditions- treks starting after today and not Completed.
+      * Verified revenue    - sum of amounts on Verified, non-cancelled bookings.
+      * Pending payments    - Booked reservations with Pending/Unpaid/Failed payment.
+
+    A verified-revenue *trend* is intentionally not produced: the schema stores
+    no payment-verification timestamp, so revenue cannot be attributed to the
+    date it was actually collected.
+    """
+    today = today or date.today()
+
+    total_bookings = db.session.query(func.count(Booking.booking_id)).scalar() or 0
+    confirmed_bookings = (
+        db.session.query(func.count(Booking.booking_id))
+        .filter(
+            Booking.status.in_(CONFIRMED_BOOKING_STATUSES),
+            Booking.payment_status.in_(CONFIRMED_PAYMENT_STATUSES),
+        )
+        .scalar() or 0
+    )
+    upcoming_expeditions = (
+        db.session.query(func.count(Trek.trek_id))
+        .filter(Trek.start_date > today, Trek.status != 'Completed')
+        .scalar() or 0
+    )
+    pending_payments = (
+        db.session.query(func.count(Booking.booking_id))
+        .filter(Booking.status == 'Booked', Booking.payment_status.in_(PENDING_PAYMENT_STATUSES))
+        .scalar() or 0
+    )
+
+    return {
+        'kpis': {
+            'total_bookings': int(total_bookings),
+            'confirmed_bookings': int(confirmed_bookings),
+            'upcoming_expeditions': int(upcoming_expeditions),
+            'pending_payments': int(pending_payments),
+        },
+        'verified_revenue': _verified_revenue(),
+        'booking_trend': _booking_trend(today),
+        'booking_status': _booking_status_distribution(),
+        'popular_treks': _popular_treks(),
+        'insights': _operational_insights(today),
+    }
+
+
 @admin_bp.route('/dashboard')
 @login_required
 @admin_required
 def dashboard():
+    analytics = build_dashboard_analytics()
+
     total_treks = Trek.query.count()
     total_users = User.query.filter_by(role='user').count()
     total_staff = User.query.filter_by(role='staff', status='Active').count()
-    total_bookings = Booking.query.count()
-    recent_bookings = Booking.query.order_by(Booking.booking_date.desc()).limit(5).all()
+    recent_bookings = (
+        Booking.query.options(joinedload(Booking.user), joinedload(Booking.trek))
+        .order_by(Booking.booking_date.desc())
+        .limit(5)
+        .all()
+    )
     open_treks = Trek.query.filter_by(status='Open').order_by(Trek.start_date.asc()).limit(5).all()
     pending_staff = User.query.filter_by(role='staff', status='Pending').count()
 
     return render_template('admin/dashboard.html',
+                           analytics=analytics,
                            total_treks=total_treks,
                            total_users=total_users,
                            total_staff=total_staff,
-                           total_bookings=total_bookings,
                            recent_bookings=recent_bookings,
                            open_treks=open_treks,
                            pending_staff=pending_staff)

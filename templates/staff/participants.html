@@ -50,7 +50,7 @@
                     </td>
                     <td class="text-end">
                         {% if booking.status == 'Booked' %}
-                        <form method="POST" action="{{ url_for('staff.cancel_booking', booking_id=booking.booking_id) }}" class="d-inline" onsubmit="return confirm('Cancel reservation for participant {{ booking.user.name }}? The slot will be returned to available capacity.');">
+                        <form method="POST" action="{{ url_for('staff.cancel_booking', booking_id=booking.booking_id) }}" class="d-inline" data-confirm-message="Cancel reservation for participant {{ booking.user.name }}? The slot will be returned to available capacity." onsubmit="return confirm(this.dataset.confirmMessage);">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button type="submit" class="btn btn-outline-danger btn-sm">
                                 <i class="bi bi-x-circle"></i> Cancel

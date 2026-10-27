@@ -89,6 +89,8 @@ TrailMate/
 ├── test_app.py                 # Separate test database on port 5001
 ├── cloudinary_service.py        # Cloudinary upload/delete helpers
 ├── razorpay_service.py         # Razorpay order/signature helpers
+├── render.yaml                 # Render Blueprint (free web service + PostgreSQL)
+├── .python-version             # Python version used by Render
 ├── migrate_add_payment_fields.py
 ├── migrate_add_image_fields.py
 ├── requirements.txt
@@ -144,7 +146,7 @@ TrailMate/
 
 ## Prerequisites
 
-- Python 3.8 or newer
+- Python 3.10 or newer (Render uses Python 3.13 from `.python-version`)
 - Git
 - A virtual environment tool (`venv`)
 - Optional: Razorpay test-mode account
@@ -176,7 +178,7 @@ Optional demo data:
 python seed.py
 ```
 
-This creates demo users, staff, treks, and bookings. Demo credentials are listed below.
+This creates demo users, staff, treks, and bookings. Demo credentials are defined in `seed.py`; never run this script against a production database. Use `flask --app wsgi init-db` instead when you only need the schema and the initial administrator.
 
 ---
 
@@ -188,15 +190,23 @@ Core variables:
 
 ```text
 FLASK_APP=wsgi.py
-FLASK_DEBUG=0
+FLASK_DEBUG=1
 SECRET_KEY=replace-with-a-secure-random-secret-key
-DATABASE_URL=postgresql://user:password@localhost:5432/trailmate_db
 ADMIN_NAME=System Admin
-ADMIN_EMAIL=admin@trailmate.com
+ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=replace-with-a-strong-admin-password
 PORT=5000
+```
+
+For production, also set:
+
+```text
+ENV=production
+DATABASE_URL=postgresql://user:password@host:5432/database
 SESSION_COOKIE_SECURE=true
 ```
+
+`FLASK_DEBUG=0` alone does **not** enable production mode. Production is activated by `ENV=production` / `FLASK_ENV=production`, a non-SQLite `DATABASE_URL`, or `RENDER=true`.
 
 Razorpay test-mode variables:
 
@@ -218,9 +228,10 @@ CLOUDINARY_API_SECRET=
 If Cloudinary variables are empty, TrailMate uses local fallback images.
 
 Notes:
-- `DATABASE_URL` is optional. When unset, TrailMate uses `instance/trekking.db`.
+- `DATABASE_URL` is optional in development. When unset, TrailMate uses `instance/trekking.db`.
+- Production requires `DATABASE_URL` to be PostgreSQL; a missing or SQLite URL stops startup.
 - `SECRET_KEY` must be strong in production; placeholder values are rejected.
-- `ADMIN_EMAIL` and `ADMIN_PASSWORD` are required for production database initialization.
+- `ADMIN_EMAIL` and `ADMIN_PASSWORD` are required when provisioning the first production administrator. They are not needed once an administrator already exists.
 
 ---
 
@@ -228,31 +239,38 @@ Notes:
 
 ### Fresh Database
 
-Create tables and the initial administrator:
+Create the complete schema and the initial administrator:
 
 ```powershell
-python -m flask --app app init-db
+python -m flask --app wsgi init-db
 ```
 
-In non-production mode, `python app.py` also initializes the database automatically.
+`db.create_all()` creates every current table and column, including the Trek image fields, the Booking payment fields, and the unique `razorpay_order_id` constraint. The command is safe to re-run: it never duplicates an administrator and never resets an existing one. In local development, `python app.py` also initializes the database automatically. On Render, the service start command runs this step automatically.
+
+Initial administrator provisioning:
+
+- Set `ADMIN_EMAIL` and a strong `ADMIN_PASSWORD` (minimum 8 characters, not a documented placeholder), or pass `--email` and `--password`.
+- Production rejects missing, default, or placeholder credentials.
+- If an administrator already exists, that account is preserved and the environment password is ignored.
+- Never put the administrator password in source code, `render.yaml`, or logs.
 
 ### Existing Database Migration
 
-For an existing database created before payment or image fields were added, run:
+The two legacy scripts are only for databases created before these fields existed:
 
 ```powershell
 python migrate_add_payment_fields.py
 python migrate_add_image_fields.py
 ```
 
-These scripts use raw `ALTER TABLE` statements and check for existing columns before changing the schema. The payment migration has SQLite-specific atomic transaction handling. Review migrations before running them against a database containing real data.
+Do **not** run them against a fresh database: the current models already create the full schema. They are not run automatically at application startup. Back up existing data first, and review the SQL before using them on PostgreSQL. The payment migration was written primarily for SQLite; its PostgreSQL index checks are less reliable, so verify the resulting schema (especially the unique `razorpay_order_id` constraint) instead of assuming success.
 
 ### SQLite and PostgreSQL
 
 - SQLite is the default and is suitable for local development.
-- PostgreSQL can be used by setting `DATABASE_URL`.
-- Migrations are dialect-aware, but SQLite-specific transaction hardening is not applied to PostgreSQL.
-- On Render, SQLite files are ephemeral. Use PostgreSQL for persistent production data.
+- PostgreSQL is required in production and is selected through `DATABASE_URL`; `postgres://` URLs are normalized to `postgresql://`.
+- Local SQLite databases under `instance/` are not committed to Git.
+- On Render, the filesystem is ephemeral, so SQLite data is lost on restart. Use the provisioned PostgreSQL database instead.
 
 ---
 
@@ -272,17 +290,19 @@ Separate test database on port 5001:
 python test_app.py
 ```
 
-Production-style entry point:
+Production-style WSGI import check (no traffic served):
 
 ```powershell
-python -m flask --app wsgi run
+python -c "import wsgi; print(wsgi.app)"
 ```
 
-Or with Gunicorn:
+The Flask development server is not a production server. On Linux/macOS or Render, run:
 
-```powershell
-gunicorn wsgi:app
+```bash
+gunicorn --bind 0.0.0.0:$PORT wsgi:app
 ```
+
+Gunicorn is not supported on Windows, so use `python app.py` locally.
 
 ---
 
@@ -304,6 +324,8 @@ python -m unittest tests.test_pending_payment_expiry
 python -m unittest tests.test_expire_pending_cli
 python -m unittest tests.test_public_discovery
 python -m unittest tests.test_payment_migration
+python -m unittest tests.test_deployment_config
+python -m unittest tests.test_session_and_ui_safety
 ```
 
 Tests use isolated in-memory or temporary SQLite databases. They do not use the real `instance/trekking.db`.
@@ -341,7 +363,9 @@ If Cloudinary is not configured, TrailMate uses local fallback images and disabl
 
 ## Render Deployment
 
-### Build and Start
+### Blueprint (recommended)
+
+`render.yaml` defines a single free Python web service and a single free PostgreSQL database. All commands and environment wiring live in that file; the `Procfile` is not used.
 
 Build command:
 
@@ -352,44 +376,69 @@ pip install -r requirements.txt
 Start command:
 
 ```text
-gunicorn --bind 0.0.0.0:$PORT wsgi:app
+sh -c "flask --app wsgi init-db && gunicorn --bind 0.0.0.0:$PORT wsgi:app"
 ```
 
-### Required Environment Variables
+The first half creates missing tables and provisions the initial administrator. It is idempotent, so later restarts detect the existing administrator and change nothing. On a free Render service this must run in the start command: Render's `preDeployCommand`, shell access, and one-off jobs are paid-plan features, and free services cannot use them.
 
-Set at least:
+Python 3.13 is selected by `.python-version`. `psycopg2-binary` and Gunicorn are already listed in `requirements.txt`.
+
+### Environment Variables
+
+Configure these in the Render Dashboard (or let the Blueprint create the core ones):
 
 ```text
-SECRET_KEY=<strong-random-secret>
-DATABASE_URL=<postgresql-connection-string>
-ADMIN_EMAIL=<admin-email>
-ADMIN_PASSWORD=<strong-admin-password>
-RAZORPAY_KEY_ID=<razorpay-test-key-id>
-RAZORPAY_KEY_SECRET=<razorpay-test-key-secret>
+DATABASE_URL=<injected automatically from the Render database>
+SECRET_KEY=<generated by Render; never hardcode it>
+ENV=production
+ADMIN_EMAIL=<your administrator email>
+ADMIN_PASSWORD=<strong password used only for the first provision>
 PAYMENT_CURRENCY=INR
 PAYMENT_PENDING_EXPIRY_MINUTES=15
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-SESSION_COOKIE_SECURE=true
-FLASK_DEBUG=0
+RAZORPAY_KEY_ID=<optional; Razorpay test-mode key id>
+RAZORPAY_KEY_SECRET=<optional; Razorpay test-mode key secret>
+CLOUDINARY_CLOUD_NAME=<optional>
+CLOUDINARY_API_KEY=<optional>
+CLOUDINARY_API_SECRET=<optional>
 ```
 
-### Database Initialization
+The Blueprint prompts for the administrator credentials and creates the non-secret payment settings. Razorpay and Cloudinary credentials are optional and are not part of the Blueprint, so the first deployment can complete without them. Add them in the dashboard when those features are needed.
 
-Initialize the database in a Render shell or one-off job:
+Notes:
 
-```powershell
-python -m flask --app wsgi init-db
-```
+- Render supplies `PORT` and `RENDER=true` automatically.
+- `SESSION_COOKIE_SECURE=true` is set in `render.yaml` and is also forced whenever production mode is active.
+- `ADMIN_PASSWORD` is used only while no administrator exists. Keep it in the dashboard rather than in Git.
+- Never set `ALLOW_PRODUCTION_SEED`; `seed.py` is for local demo data only.
+- If Razorpay or Cloudinary values are empty, booking/payment or image-upload features stay unavailable. The rest of the application still runs.
 
-For an existing database, run the required migration scripts before starting the app.
+### First Deployment
 
-### Persistent Database Considerations
+1. Push the repository (without local databases or `.env`) to GitHub.
+2. In Render, choose **New > Blueprint** and connect the repository.
+3. Confirm the `trailmate-db` and `trailmate` resources and enter `ADMIN_EMAIL` and `ADMIN_PASSWORD` when prompted.
+4. Apply the Blueprint and wait for the build, start-command initialization, and first boot to finish.
+5. Open the `onrender.com` URL and log in as the administrator.
+6. If needed, add Razorpay or Cloudinary credentials in the service's Environment settings and redeploy.
 
-- The default SQLite database is not persistent on Render.
-- Use PostgreSQL for deployed data.
-- Do not rely on local SQLite files for production.
+If initialization fails, the deploy fails before serving traffic. Check the deploy logs for a missing or invalid `SECRET_KEY`, a non-PostgreSQL `DATABASE_URL`, or rejected administrator credentials; secret values are never printed.
+
+### Free-Plan Limitations
+
+Free instances are suitable for a college demonstration, not durable production use:
+
+- A free web service spins down after 15 minutes without traffic and takes about a minute to wake.
+- The filesystem is ephemeral. Local SQLite databases and uploaded files are lost on restart or redeploy.
+- Free web services have no Shell, no one-off jobs, and no Cron Jobs, and cannot use `preDeployCommand`.
+- Each workspace can have only one free PostgreSQL database, with a 1 GB limit.
+- Free PostgreSQL expires **30 days after creation**, has no backups, and is deleted after a further 14-day grace period unless upgraded. Export important data or upgrade before then.
+- There are monthly limits on free instance hours, bandwidth, and build pipeline minutes.
+
+Schedule/export data before expiry if the project must stay available after the semester. Upgrading the database to a paid plan preserves its data; do not recreate the free database and expect the old data to remain.
+
+### Optional Paid-Plan Improvements
+
+If the service is upgraded, `flask --app wsgi init-db` can be moved to `preDeployCommand`, and `flask --app wsgi expire-pending-bookings` can run as a scheduled Cron Job every few minutes. Neither is required for the free deployment, and neither is configured automatically.
 
 ### Images
 
@@ -404,7 +453,7 @@ TrailMate includes a CLI command:
 python -m flask --app wsgi expire-pending-bookings
 ```
 
-A Render Cron Job is recommended but is not configured automatically. Configure it to run every 1 to 5 minutes if you want stale pending payments expired without waiting for user traffic.
+Free Render services cannot run a Cron Job, so stale pending payments are expired lazily when relevant booking pages are loaded. On a paid plan, schedule the command if you want expiry to run without user traffic.
 
 ---
 
@@ -418,12 +467,15 @@ A Render Cron Job is recommended but is not configured automatically. Configure 
 - Payment signatures are verified server-side.
 - Post-login redirect targets are validated against open redirects.
 - `.env` is ignored by Git and must never be committed.
+- Production startup fails closed on a missing/placeholder `SECRET_KEY` or a missing/SQLite `DATABASE_URL`.
+- Production forces secure cookies, trusts one reverse-proxy hop for HTTPS, and refuses to run the Flask development server.
+- Deactivated or rejected accounts lose access on their next request, even if they still hold a session.
 - Use strong production secrets and admin credentials.
 - Use HTTPS and set `SESSION_COOKIE_SECURE=true` in production.
 
 Production limitations:
 - SQLite is not recommended for production.
-- No built-in background scheduler is included; use the CLI command with Render Cron.
+- No built-in background scheduler is included. Free Render services cannot run Cron Jobs; use the CLI command on a paid plan if needed.
 - The default fixed payment amount is for testing.
 - No rate limiting is currently implemented.
 
@@ -436,7 +488,8 @@ Production limitations:
 - Cloudinary validation checks extension and size, but not file content type or magic bytes.
 - No pagination is implemented for large trek or booking lists.
 - No email notifications are sent for bookings or payment status.
-- Payment expiry runs on selected requests and through the optional CLI cron job.
+- Payment expiry runs on selected requests and, on paid plans, through the optional CLI command.
+- Free Render PostgreSQL expires after 30 days and has no backups.
 
 ---
 

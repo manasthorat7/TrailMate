@@ -5,7 +5,7 @@
 <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
     <div>
         <h1 class="page-header-title">Operations Dashboard</h1>
-        <p class="page-header-subtitle">Real-time overview of trekking expeditions, registrations, and staff allocation.</p>
+        <p class="page-header-subtitle">Real-time overview of bookings, payments, expeditions, and staff allocation.</p>
     </div>
     <div class="d-flex gap-2">
         <a href="{{ url_for('admin.add_trek') }}" class="btn btn-primary btn-sm">
@@ -14,51 +14,92 @@
     </div>
 </div>
 
-<!-- 4 Key Metrics -->
-<div class="row g-3 mb-4">
-    <div class="col-sm-6 col-lg-3">
-        <div class="stat-card">
-            <div>
-                <div class="stat-card-label">Total Treks</div>
-                <div class="stat-card-value">{{ total_treks }}</div>
-            </div>
-            <div class="stat-card-icon">
-                <i class="bi bi-compass"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="stat-card accent">
-            <div>
-                <div class="stat-card-label">Trekkers</div>
-                <div class="stat-card-value">{{ total_users }}</div>
-            </div>
-            <div class="stat-card-icon">
-                <i class="bi bi-people"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="stat-card">
-            <div>
-                <div class="stat-card-label">Active Staff</div>
-                <div class="stat-card-value">{{ total_staff }}</div>
-            </div>
-            <div class="stat-card-icon">
-                <i class="bi bi-person-badge"></i>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="stat-card accent">
+<!-- Analytics KPIs -->
+<div class="row g-3 mb-3">
+    <div class="col-6 col-md-4 col-xl">
+        <div class="stat-card h-100">
             <div>
                 <div class="stat-card-label">Total Bookings</div>
-                <div class="stat-card-value">{{ total_bookings }}</div>
+                <div class="stat-card-value">{{ analytics.kpis.total_bookings }}</div>
+                <div class="stat-card-note">All booking records</div>
             </div>
             <div class="stat-card-icon">
                 <i class="bi bi-ticket-perforated"></i>
             </div>
         </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl">
+        <div class="stat-card h-100">
+            <div>
+                <div class="stat-card-label">Confirmed Bookings</div>
+                <div class="stat-card-value">{{ analytics.kpis.confirmed_bookings }}</div>
+                <div class="stat-card-note">Verified or legacy paid</div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="bi bi-patch-check"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl">
+        <div class="stat-card h-100">
+            <div>
+                <div class="stat-card-label">Upcoming Expeditions</div>
+                <div class="stat-card-value">{{ analytics.kpis.upcoming_expeditions }}</div>
+                <div class="stat-card-note">Departing after today</div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-md-4 col-xl">
+        <div class="stat-card accent h-100">
+            <div>
+                <div class="stat-card-label">Verified Revenue</div>
+                <div class="stat-card-value stat-card-value-sm">{{ analytics.verified_revenue.primary }}</div>
+                <div class="stat-card-note">
+                    {% if analytics.verified_revenue.breakdown|length > 1 %}
+                        {{ analytics.verified_revenue.displays | join(' + ') }}
+                    {% else %}
+                        Razorpay-verified payments
+                    {% endif %}
+                </div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl">
+        <div class="stat-card accent h-100">
+            <div>
+                <div class="stat-card-label">Pending Payments</div>
+                <div class="stat-card-value">{{ analytics.kpis.pending_payments }}</div>
+                <div class="stat-card-note">Reserved, not verified</div>
+            </div>
+            <div class="stat-card-icon">
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inventory overview -->
+<div class="inventory-strip mb-4">
+    <div class="inventory-item">
+        <i class="bi bi-compass"></i>
+        <span>Total Treks</span>
+        <strong>{{ total_treks }}</strong>
+    </div>
+    <div class="inventory-item">
+        <i class="bi bi-people"></i>
+        <span>Registered Trekkers</span>
+        <strong>{{ total_users }}</strong>
+    </div>
+    <div class="inventory-item">
+        <i class="bi bi-person-badge"></i>
+        <span>Active Guides</span>
+        <strong>{{ total_staff }}</strong>
     </div>
 </div>
 
@@ -77,6 +118,174 @@
     </a>
 </div>
 {% endif %}
+
+<!-- Analytics charts: trend + status distribution -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="content-panel h-100">
+            <div class="panel-header flex-wrap gap-2">
+                <div>
+                    <h5 class="panel-title"><i class="bi bi-graph-up-arrow text-success me-2"></i> Booking Trends</h5>
+                    <p class="panel-subtitle mb-0">Bookings created per day over the last {{ analytics.booking_trend.window_days }} days.</p>
+                </div>
+                <span class="badge bg-light text-secondary border">{{ analytics.booking_trend.total }} in window</span>
+            </div>
+            <div class="p-3 p-md-4">
+                <div class="chart-frame" id="bookingTrendChartFrame">
+                    <canvas id="bookingTrendChart" role="img" aria-label="Daily booking counts for the last {{ analytics.booking_trend.window_days }} days"></canvas>
+                </div>
+                <div class="chart-fallback d-none" id="bookingTrendChartFallback">
+                    <i class="bi bi-bar-chart-line"></i>
+                    <p class="mb-0">Chart library could not be loaded. Daily bookings are still counted in the KPI cards above.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="content-panel h-100">
+            <div class="panel-header">
+                <div>
+                    <h5 class="panel-title"><i class="bi bi-pie-chart text-success me-2"></i> Booking Status</h5>
+                    <p class="panel-subtitle mb-0">Booking status, separate from payment status.</p>
+                </div>
+            </div>
+            <div class="p-3 p-md-4">
+                {% if analytics.booking_status.total %}
+                <div class="chart-frame chart-frame-sm" id="bookingStatusChartFrame">
+                    <canvas id="bookingStatusChart" role="img" aria-label="Distribution of booking statuses"></canvas>
+                </div>
+                <div class="chart-fallback d-none" id="bookingStatusChartFallback">
+                    <i class="bi bi-pie-chart"></i>
+                    <p class="mb-0">Chart library could not be loaded. Status totals are: {{ analytics.booking_status.labels | join(', ') }}.</p>
+                </div>
+                {% else %}
+                <div class="empty-state py-5">
+                    <div class="empty-state-icon"><i class="bi bi-pie-chart"></i></div>
+                    <p class="mb-0">No bookings yet, so there is no status distribution to chart.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analytics charts: popular treks + operations -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="content-panel h-100">
+            <div class="panel-header flex-wrap gap-2">
+                <div>
+                    <h5 class="panel-title"><i class="bi bi-trophy text-success me-2"></i> Most Popular Treks</h5>
+                    <p class="panel-subtitle mb-0">Top treks by booking count. Cancelled bookings are excluded.</p>
+                </div>
+                <a href="{{ url_for('admin.manage_treks') }}" class="btn btn-outline-secondary btn-sm">Manage Treks</a>
+            </div>
+            <div class="p-3 p-md-4">
+                {% if analytics.popular_treks %}
+                <div class="chart-frame" id="popularTreksChartFrame">
+                    <canvas id="popularTreksChart" role="img" aria-label="Top treks by non-cancelled booking count"></canvas>
+                </div>
+                <div class="chart-fallback d-none" id="popularTreksChartFallback">
+                    <i class="bi bi-bar-chart"></i>
+                    <p class="mb-0">Chart library could not be loaded. Rankings are based on non-cancelled bookings.</p>
+                </div>
+                {% else %}
+                <div class="empty-state py-5">
+                    <div class="empty-state-icon"><i class="bi bi-bar-chart"></i></div>
+                    <p class="mb-0">No non-cancelled bookings yet, so there is no trek ranking to chart.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="content-panel h-100">
+            <div class="panel-header">
+                <div>
+                    <h5 class="panel-title"><i class="bi bi-clipboard-pulse text-success me-2"></i> Operational Insights</h5>
+                    <p class="panel-subtitle mb-0">Items that may need administrator attention.</p>
+                </div>
+            </div>
+            <div class="p-3 p-md-4">
+                <!-- Upcoming departures -->
+                <div class="insight-block">
+                    <div class="insight-heading">
+                        <span><i class="bi bi-calendar-check"></i> Upcoming Departures</span>
+                        <span class="insight-count">{{ analytics.insights.upcoming_count }}</span>
+                    </div>
+                    <ul class="insight-list">
+                        {% for trek in analytics.insights.upcoming_treks %}
+                        <li class="insight-item">
+                            <a href="{{ url_for('admin.edit_trek', trek_id=trek.trek_id) }}">{{ trek.trek_name }}</a>
+                            <span>{{ trek.start_date.strftime('%b %d, %Y') }}</span>
+                        </li>
+                        {% else %}
+                        <li class="insight-empty">No upcoming departures scheduled.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Low remaining capacity -->
+                <div class="insight-block">
+                    <div class="insight-heading">
+                        <span><i class="bi bi-speedometer"></i> Low Remaining Capacity</span>
+                        <span class="insight-count">{{ analytics.insights.low_capacity_count }}</span>
+                    </div>
+                    <ul class="insight-list">
+                        {% for trek in analytics.insights.low_capacity_treks %}
+                        <li class="insight-item">
+                            <a href="{{ url_for('admin.edit_trek', trek_id=trek.trek_id) }}">{{ trek.trek_name }}</a>
+                            <span>{{ trek.available_slots }} slot{% if trek.available_slots != 1 %}s{% endif %} left</span>
+                        </li>
+                        {% else %}
+                        <li class="insight-empty">No open treks at or below {{ analytics.insights.low_capacity_threshold }} slots.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Pending-payment bookings -->
+                <div class="insight-block">
+                    <div class="insight-heading">
+                        <span><i class="bi bi-hourglass-split"></i> Awaiting Payment</span>
+                        <span class="insight-count">{{ analytics.insights.pending_count }}</span>
+                    </div>
+                    <ul class="insight-list">
+                        {% for booking in analytics.insights.pending_bookings %}
+                        <li class="insight-item">
+                            <a href="{{ url_for('admin.view_bookings') }}">Booking #{{ booking.booking_id }}</a>
+                            <span>
+                                {{ booking.trek.trek_name if booking.trek else 'Trek unavailable' }}
+                                &bull; {{ booking.booking_date.strftime('%b %d') }}
+                            </span>
+                        </li>
+                        {% else %}
+                        <li class="insight-empty">No reservations are awaiting payment.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Treks without an assigned guide -->
+                <div class="insight-block">
+                    <div class="insight-heading">
+                        <span><i class="bi bi-person-dash"></i> Treks Without a Guide</span>
+                        <span class="insight-count">{{ analytics.insights.unassigned_count }}</span>
+                    </div>
+                    <ul class="insight-list">
+                        {% for trek in analytics.insights.unassigned_treks %}
+                        <li class="insight-item">
+                            <a href="{{ url_for('admin.edit_trek', trek_id=trek.trek_id) }}">{{ trek.trek_name }}</a>
+                            <span>{{ trek.start_date.strftime('%b %d, %Y') }}</span>
+                        </li>
+                        {% else %}
+                        <li class="insight-empty">Every active trek has an assigned guide.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Split Overview Sections -->
 <div class="row g-4">
@@ -151,4 +360,195 @@
         </div>
     </div>
 </div>
+
+<!-- Metric definitions -->
+<div class="analytics-note mt-4">
+    <i class="bi bi-info-circle"></i>
+    <span>
+        <strong>Metric definitions.</strong>
+        Verified revenue counts only Razorpay-verified bookings that are booked or completed; pending, unpaid, failed,
+        legacy, and cancelled payments are excluded. A verified-revenue trend is not shown because the schema does not
+        store a payment-verification timestamp. Booking trends count every booking by creation date, while popular-trek
+        rankings exclude cancelled bookings.
+    </span>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    "use strict";
+
+    var bookingTrend = {{ analytics.booking_trend | tojson }};
+    var bookingStatus = {{ analytics.booking_status | tojson }};
+    var popularTreks = {{ analytics.popular_treks | tojson }};
+
+    function showChartFallback(name) {
+        var frame = document.getElementById(name + 'ChartFrame');
+        var fallback = document.getElementById(name + 'ChartFallback');
+        if (frame) { frame.classList.add('d-none'); }
+        if (fallback) { fallback.classList.remove('d-none'); }
+    }
+
+    if (typeof Chart === 'undefined') {
+        showChartFallback('bookingTrend');
+        showChartFallback('bookingStatus');
+        showChartFallback('popularTreks');
+        return;
+    }
+
+    Chart.defaults.font.family = "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif";
+    Chart.defaults.color = '#58645c';
+
+    var gridColor = 'rgba(230, 227, 218, 0.75)';
+    var statusPalette = {
+        Booked: '#183727',
+        Completed: '#87948b',
+        Cancelled: '#c5221f'
+    };
+    var fallbackPalette = ['#d36928', '#1a73e8', '#b45309', '#137333', '#5f6368'];
+
+    try {
+        var trendCanvas = document.getElementById('bookingTrendChart');
+        if (trendCanvas) {
+            new Chart(trendCanvas, {
+                type: 'line',
+                data: {
+                    labels: bookingTrend.labels,
+                    datasets: [{
+                        label: 'Bookings',
+                        data: bookingTrend.values,
+                        borderColor: '#183727',
+                        backgroundColor: 'rgba(24, 55, 39, 0.08)',
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        pointHoverRadius: 4,
+                        pointBackgroundColor: '#183727',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return context.parsed.y + ' booking(s)';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0, color: '#58645c' },
+                            grid: { color: gridColor }
+                        },
+                        x: {
+                            ticks: { maxTicksLimit: 8, color: '#58645c' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        showChartFallback('bookingTrend');
+    }
+
+    try {
+        var statusCanvas = document.getElementById('bookingStatusChart');
+        if (statusCanvas) {
+            var statusColors = bookingStatus.labels.map(function (label, index) {
+                return statusPalette[label] || fallbackPalette[index % fallbackPalette.length];
+            });
+            new Chart(statusCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: bookingStatus.labels,
+                    datasets: [{
+                        data: bookingStatus.values,
+                        backgroundColor: statusColors,
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '62%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { usePointStyle: true, boxWidth: 8, padding: 14 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return context.label + ': ' + context.parsed + ' booking(s)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        showChartFallback('bookingStatus');
+    }
+
+    try {
+        var popularCanvas = document.getElementById('popularTreksChart');
+        if (popularCanvas) {
+            new Chart(popularCanvas, {
+                type: 'bar',
+                data: {
+                    labels: popularTreks.map(function (trek) { return trek.trek_name; }),
+                    datasets: [{
+                        label: 'Bookings',
+                        data: popularTreks.map(function (trek) { return trek.count; }),
+                        backgroundColor: '#d36928',
+                        hoverBackgroundColor: '#b85418',
+                        borderRadius: 6,
+                        barThickness: 18
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return context.parsed.x + ' booking(s)';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { precision: 0, color: '#58645c' },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                            ticks: { color: '#58645c' },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        showChartFallback('popularTreks');
+    }
+})();
+</script>
 {% endblock %}

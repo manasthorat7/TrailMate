@@ -10,6 +10,7 @@ load_dotenv()
 INSECURE_SECRET_KEYS = {
     '',
     'trailmate-secret-key-123',
+    'trailmate-dev-secret-key-123',
     'trailmate-dev-secret-key-change-in-prod',
     'trailmate-dev-secret-key',
     'dev',
@@ -25,13 +26,43 @@ INSECURE_ADMIN_PASSWORDS = {
     '',
     'admin123',
     'admin',
+    'admin@123',
     'password',
+    'password123',
+    'letmein',
+    'qwerty',
+    'welcome',
     '123456',
     'changeme',
     'secret',
     'trailmate',
     'root',
+    'replace-with-a-strong-admin-password',
 }
+
+# Values copied straight from documentation or example files are treated as
+# placeholders even when they are not listed in the explicit deny sets above.
+PLACEHOLDER_PREFIXES = (
+    'replace-with',
+    'change-me',
+    'changeme',
+    'placeholder',
+    'your-',
+    'your_',
+    '<',
+)
+
+MIN_PRODUCTION_SECRET_KEY_LENGTH = 16
+MIN_ADMIN_PASSWORD_LENGTH = 8
+
+
+def looks_like_placeholder(value, deny_list):
+    """Return True for empty, denied, or documentation-style placeholder values."""
+    value = (value or '').strip()
+    if not value:
+        return True
+    lowered = value.lower()
+    return lowered in deny_list or lowered.startswith(PLACEHOLDER_PREFIXES)
 
 
 def is_production_mode(config_dict=None):
@@ -41,11 +72,17 @@ def is_production_mode(config_dict=None):
     """
     if config_dict and config_dict.get('TESTING'):
         return False
-    if config_dict and (config_dict.get('ENV') == 'production' or config_dict.get('FLASK_ENV') == 'production'):
-        return True
+    if config_dict:
+        configured_env = str(
+            config_dict.get('ENV') or config_dict.get('FLASK_ENV') or ''
+        ).strip().lower()
+        if configured_env == 'production':
+            return True
+        if configured_env == 'development':
+            return False
 
-    flask_env = os.environ.get('FLASK_ENV', '').lower()
-    env = os.environ.get('ENV', '').lower()
+    flask_env = os.environ.get('FLASK_ENV', '').strip().lower()
+    env = os.environ.get('ENV', '').strip().lower()
     if flask_env == 'production' or env == 'production':
         return True
     if flask_env == 'development' or env == 'development':
@@ -53,24 +90,29 @@ def is_production_mode(config_dict=None):
 
     # Remote database connection indicates a production/staging environment
     db_url = os.environ.get('DATABASE_URL', '')
-    if db_url and not db_url.startswith('sqlite'):
+    if db_url and not is_sqlite_database_url(db_url):
         return True
 
-    # Explicit non-debug setting indicates production
-    debug_val = os.environ.get('FLASK_DEBUG', '').lower()
-    if debug_val in ('0', 'false', 'f'):
+    # Render sets RENDER=true automatically for every deployed service.
+    if os.environ.get('RENDER', '').strip().lower() in ('true', '1'):
         return True
 
     return False
 
 
 def normalize_database_url(url):
-    """Normalize legacy postgres:// scheme to postgresql:// for SQLAlchemy compatibility."""
+    """Normalize Render/Heroku-style database URLs for SQLAlchemy + psycopg2."""
     if not url:
         return url
+    url = url.strip()
     if url.startswith('postgres://'):
         return url.replace('postgres://', 'postgresql://', 1)
     return url
+
+
+def is_sqlite_database_url(url):
+    """Return True when a SQLAlchemy URL points at a local SQLite database."""
+    return (url or '').strip().lower().startswith('sqlite')
 
 
 def init_db(target_app, admin_email=None, admin_password=None, admin_name=None):
@@ -103,9 +145,9 @@ def init_db(target_app, admin_email=None, admin_password=None, admin_name=None):
                 raise ValueError(
                     "Production administrator provisioning requires an explicit ADMIN_EMAIL environment variable or --email option."
                 )
-            if not password or password.lower() in INSECURE_ADMIN_PASSWORDS or len(password) < 8:
+            if looks_like_placeholder(password, INSECURE_ADMIN_PASSWORDS) or len(password) < MIN_ADMIN_PASSWORD_LENGTH:
                 raise ValueError(
-                    "Production administrator provisioning requires an explicit, secure ADMIN_PASSWORD environment variable or --password option (minimum 8 characters, non-default)."
+                    "Production administrator provisioning requires an explicit, secure ADMIN_PASSWORD environment variable or --password option (minimum 8 characters, not a documented placeholder)."
                 )
         else:
             # Convenient development fallbacks
@@ -124,9 +166,21 @@ def init_db(target_app, admin_email=None, admin_password=None, admin_name=None):
         try:
             db.session.add(default_admin)
             db.session.commit()
-            target_app.logger.info(f"Initial Administrator ({email}) provisioned successfully.")
+            target_app.logger.info("Initial administrator (%s) provisioned successfully.", email)
         except Exception:
             db.session.rollback()
+            # A concurrent init-db run may have won the race. Preserve the
+            # already-provisioned administrator instead of failing the deploy.
+            existing = None
+            try:
+                existing = User.query.filter_by(role='admin').first()
+            except Exception:
+                existing = None
+            if existing:
+                target_app.logger.info(
+                    "Administrator already provisioned by another run; preserving the existing account."
+                )
+                return
             raise
 
 
@@ -139,42 +193,84 @@ def create_app(test_config=None, db_name='trekking.db'):
 
     is_prod = is_production_mode(app.config)
 
+    # Render terminates TLS at its proxy. Trust exactly one forwarded hop so
+    # request.scheme / url_for reflect HTTPS without trusting arbitrary headers.
+    from werkzeug.middleware.proxy_fix import ProxyFix
+
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
     # Secret key handling: require explicit, non-placeholder in production
-    secret_key = app.config.get('SECRET_KEY') or os.environ.get('SECRET_KEY', '')
+    secret_key = (app.config.get('SECRET_KEY') or os.environ.get('SECRET_KEY', '')).strip()
     if is_prod:
-        if not secret_key or secret_key.strip() in INSECURE_SECRET_KEYS:
+        if (
+            looks_like_placeholder(secret_key, INSECURE_SECRET_KEYS)
+            or len(secret_key) < MIN_PRODUCTION_SECRET_KEY_LENGTH
+        ):
             raise ValueError(
-                "Production startup failed: A secure, non-placeholder SECRET_KEY environment variable "
-                "must be explicitly configured. Using default or placeholder secret keys in production is prohibited."
+                "Production startup failed: a secure, non-placeholder SECRET_KEY environment variable "
+                f"of at least {MIN_PRODUCTION_SECRET_KEY_LENGTH} characters must be explicitly configured. "
+                "Using default or placeholder secret keys in production is prohibited."
             )
         app.config['SECRET_KEY'] = secret_key
     else:
         # Development fallback
-        app.config['SECRET_KEY'] = secret_key if secret_key and secret_key.strip() not in INSECURE_SECRET_KEYS else 'trailmate-dev-secret-key-123'
+        app.config['SECRET_KEY'] = (
+            secret_key
+            if not looks_like_placeholder(secret_key, INSECURE_SECRET_KEYS)
+            else 'trailmate-dev-secret-key-123'
+        )
 
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', False)
 
-    # Session cookie hardening defaults
+    # Session cookie hardening
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-    if os.environ.get('SESSION_COOKIE_SECURE', '').lower() in ('true', '1'):
+    if is_prod:
+        # Render always serves HTTPS. Secure cookies are mandatory in production.
+        app.config['SESSION_COOKIE_SECURE'] = True
+        app.config['REMEMBER_COOKIE_SECURE'] = True
+        app.config['PREFERRED_URL_SCHEME'] = 'https'
+    elif os.environ.get('SESSION_COOKIE_SECURE', '').strip().lower() in ('true', '1'):
         app.config['SESSION_COOKIE_SECURE'] = True
 
-    # Database configuration: support DATABASE_URL (PostgreSQL) or fallback to SQLite
+    # Database configuration: DATABASE_URL (Render PostgreSQL) takes priority.
+    # Production must never fall back to a local SQLite file; development keeps
+    # the existing SQLite workflow and explicit db_name overrides.
     basedir = os.path.abspath(os.path.dirname(__file__))
     instance_path = os.path.join(basedir, 'instance')
     if not os.path.exists(instance_path):
         os.makedirs(instance_path, exist_ok=True)
 
-    if not app.config.get('SQLALCHEMY_DATABASE_URI'):
-        if db_name != 'trekking.db':
+    database_url = normalize_database_url(os.environ.get('DATABASE_URL'))
+    explicit_uri = app.config.get('SQLALCHEMY_DATABASE_URI')
+    explicit_db_name = db_name != 'trekking.db'
+
+    if not explicit_uri:
+        if explicit_db_name:
+            # Local helper/test entry points (e.g. test_app.py) choose a SQLite file.
             app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(instance_path, db_name)
+        elif database_url:
+            if is_prod and is_sqlite_database_url(database_url):
+                raise ValueError(
+                    "Production startup failed: DATABASE_URL points to a local SQLite database. "
+                    "Configure the shared PostgreSQL connection string provided by Render."
+                )
+            app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+        elif is_prod:
+            raise ValueError(
+                "Production startup failed: DATABASE_URL is not set. Production requires a shared "
+                "PostgreSQL database; the local SQLite fallback is disabled."
+            )
         else:
-            database_url = os.environ.get('DATABASE_URL')
-            if database_url:
-                app.config['SQLALCHEMY_DATABASE_URI'] = normalize_database_url(database_url)
-            else:
-                app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(instance_path, db_name)
+            app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(instance_path, db_name)
+
+    if not is_sqlite_database_url(app.config['SQLALCHEMY_DATABASE_URI']):
+        # Render Postgres connections can be closed by the platform; pre-ping
+        # avoids stale pooled connections without raising the pool size.
+        app.config.setdefault('SQLALCHEMY_ENGINE_OPTIONS', {
+            'pool_pre_ping': True,
+            'pool_recycle': 280,
+        })
 
     db.init_app(app)
 
@@ -192,7 +288,12 @@ def create_app(test_config=None, db_name='trekking.db'):
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        user = User.query.get(int(user_id))
+        # Re-check status on every request so deactivated or rejected accounts
+        # cannot keep using an existing login session.
+        if user is not None and user.status != 'Active':
+            return None
+        return user
 
     @login_manager.unauthorized_handler
     def unauthorized():
@@ -307,17 +408,30 @@ def create_app(test_config=None, db_name='trekking.db'):
     @click.option('--name', default=None, help='Initial admin name')
     def init_db_cli(email, password, name):
         """Initialize database schema and provision initial administrator."""
-        init_db(app, admin_email=email, admin_password=password, admin_name=name)
+        try:
+            init_db(app, admin_email=email, admin_password=password, admin_name=name)
+        except ValueError as exc:
+            # ClickException prints the message without a traceback and never
+            # echoes the password that was supplied.
+            raise click.ClickException(str(exc))
         click.echo("Database initialized successfully.")
 
     return app
 
 
 if __name__ == '__main__':
+    # Production must be served by Gunicorn/WSGI. Refuse the Flask development
+    # server (and its auto-initialization path) when production is detected.
+    if is_production_mode():
+        raise SystemExit(
+            "Refusing to start the Flask development server in production. "
+            "Use: gunicorn --bind 0.0.0.0:$PORT wsgi:app"
+        )
+
     port = int(os.environ.get('PORT', 5000))
-    debug_mode = os.environ.get('FLASK_DEBUG', '1').lower() in ('true', '1', 't')
+    debug_mode = os.environ.get('FLASK_DEBUG', '1').strip().lower() in ('true', '1', 't')
     app = create_app()
-    # In local development via `python app.py`, ensure SQLite database exists for developer convenience
-    if not is_production_mode(app.config):
-        init_db(app)
+    # In local development via `python app.py`, ensure the SQLite database
+    # exists for developer convenience. Production never reaches this path.
+    init_db(app)
     app.run(host='0.0.0.0', port=port, debug=debug_mode)

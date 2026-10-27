@@ -3,6 +3,7 @@ seed.py
 Initializes the database with testing data for TrailMate.
 """
 
+import os
 import sys
 import random
 from datetime import datetime, timedelta, date

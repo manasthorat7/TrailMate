@@ -612,6 +612,235 @@ a:hover {
 }
 
 /* ==============================================================================
+   Admin Analytics Dashboard
+   ============================================================================== */
+
+.stat-card-value-sm {
+    font-size: 1.45rem;
+    letter-spacing: -0.01em;
+}
+
+.stat-card-note {
+    margin-top: 8px;
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: var(--tm-text-tertiary);
+    line-height: 1.3;
+}
+
+.inventory-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
+    background-color: var(--tm-surface);
+    border: 1px solid var(--tm-border);
+    border-radius: var(--tm-radius-sm);
+    box-shadow: var(--tm-shadow-sm);
+}
+
+.inventory-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 160px;
+    padding: 6px 10px;
+    font-size: 0.86rem;
+    color: var(--tm-text-secondary);
+}
+
+.inventory-item + .inventory-item {
+    border-left: 1px solid var(--tm-border-light);
+}
+
+.inventory-item i {
+    color: var(--tm-primary);
+    font-size: 1rem;
+}
+
+.inventory-item strong {
+    margin-left: auto;
+    color: var(--tm-text);
+    font-weight: 800;
+}
+
+.panel-subtitle {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--tm-text-tertiary);
+    line-height: 1.4;
+}
+
+.chart-frame {
+    position: relative;
+    width: 100%;
+    height: 300px;
+}
+
+.chart-frame-sm {
+    height: 300px;
+}
+
+.chart-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 220px;
+    padding: 24px;
+    text-align: center;
+    color: var(--tm-text-secondary);
+    background-color: var(--tm-bg);
+    border: 1px dashed var(--tm-border);
+    border-radius: var(--tm-radius-sm);
+    font-size: 0.88rem;
+}
+
+.chart-fallback i {
+    font-size: 2rem;
+    color: var(--tm-text-tertiary);
+}
+
+.insight-block {
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--tm-border-light);
+}
+
+.insight-block:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.insight-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--tm-text-secondary);
+}
+
+.insight-heading i {
+    color: var(--tm-primary);
+    margin-right: 4px;
+}
+
+.insight-count {
+    min-width: 24px;
+    padding: 2px 8px;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    color: var(--tm-primary);
+    background-color: var(--tm-primary-subtle);
+    border-radius: 100px;
+}
+
+.insight-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.insight-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.insight-item:hover {
+    background-color: var(--tm-bg);
+}
+
+.insight-item a {
+    color: var(--tm-text);
+    font-weight: 600;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.insight-item a:hover {
+    color: var(--tm-accent);
+}
+
+.insight-item span {
+    flex-shrink: 0;
+    color: var(--tm-text-tertiary);
+    font-size: 0.76rem;
+    text-align: right;
+}
+
+.insight-empty {
+    padding: 6px 8px;
+    font-size: 0.82rem;
+    color: var(--tm-text-tertiary);
+    font-style: italic;
+}
+
+.analytics-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 18px;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    color: var(--tm-text-secondary);
+    background-color: var(--tm-bg-alt);
+    border: 1px solid var(--tm-border);
+    border-radius: var(--tm-radius-sm);
+}
+
+.analytics-note i {
+    color: var(--tm-primary);
+    margin-top: 2px;
+}
+
+@media (max-width: 991.98px) {
+    .chart-frame,
+    .chart-frame-sm {
+        height: 260px;
+    }
+
+    .inventory-item + .inventory-item {
+        border-left: none;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .chart-frame,
+    .chart-frame-sm {
+        height: 220px;
+    }
+
+    .stat-card-value-sm {
+        font-size: 1.15rem;
+    }
+
+    .inventory-strip {
+        gap: 4px;
+    }
+
+    .inventory-item {
+        flex-basis: 100%;
+    }
+}
+
+/* ==============================================================================
    Data Tables & Surface Panels
    ============================================================================== */
 
