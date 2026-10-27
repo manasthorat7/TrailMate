@@ -6,6 +6,13 @@ This repository is suitable for local development, university project evaluation
 
 ---
 
+## Live Demo
+
+- Live Application: [https://trailmate-hc9y.onrender.com](https://trailmate-hc9y.onrender.com)
+- Demo Video: [Add your demo video link here]
+
+---
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -31,6 +38,8 @@ This repository is suitable for local development, university project evaluation
 ---
 
 ## Overview
+
+Demo Video: [Add your demo video link here]
 
 TrailMate connects trekkers with curated mountain expeditions. Public visitors can browse open treks and view expedition details without logging in. Authenticated trekkers can filter treks, reserve slots, complete test-mode Razorpay payments, and manage bookings. Staff members manage assigned expeditions and participant rosters. Administrators manage treks, users, staff, bookings, and optional Cloudinary cover images.
 

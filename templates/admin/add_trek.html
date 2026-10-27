@@ -66,6 +66,8 @@
                             </div>
                         </div>
 
+                        <div class="col-md-4">
+                            <label class="form-label" for="available_slots">Available Slots</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light text-muted"><i class="bi bi-people"></i></span>
                                 <input type="number" class="form-control" id="available_slots" name="available_slots" min="{% if trek %}0{% else %}1{% endif %}" value="{{ trek.available_slots if trek else '' }}" placeholder="e.g. 25" required>
@@ -134,13 +136,10 @@
                                     </div>
                                 </div>
                                 <div class="mt-2">
-                                    <form method="POST" action="{{ url_for('admin.remove_trek_image', trek_id=trek.trek_id) }}" class="d-inline"
-                                          onsubmit="return confirm('Remove the current image? The trek will revert to the local fallback.');">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">
-                                            <i class="bi bi-trash"></i> Remove Image
-                                        </button>
-                                    </form>
+                                    <button type="submit" form="remove-trek-image-form" class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('Remove the current image? The trek will revert to the local fallback.');">
+                                        <i class="bi bi-trash"></i> Remove Image
+                                    </button>
                                 </div>
                             </div>
                             {% elif trek %}
@@ -182,6 +181,11 @@
                         </button>
                     </div>
                 </form>
+                {% if trek and trek.image_url %}
+                <form id="remove-trek-image-form" method="POST" action="{{ url_for('admin.remove_trek_image', trek_id=trek.trek_id) }}" class="d-none">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                </form>
+                {% endif %}
             </div>
         </div>
     </div>
