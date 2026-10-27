@@ -101,12 +101,14 @@ def is_production_mode(config_dict=None):
 
 
 def normalize_database_url(url):
-    """Normalize Render/Heroku-style database URLs for SQLAlchemy + psycopg2."""
+    """Normalize PostgreSQL URLs to SQLAlchemy's installed psycopg2 driver."""
     if not url:
         return url
     url = url.strip()
-    if url.startswith('postgres://'):
-        return url.replace('postgres://', 'postgresql://', 1)
+    lowered = url.lower()
+    for prefix in ('postgres://', 'postgresql://', 'postgresql+psycopg://'):
+        if lowered.startswith(prefix):
+            return 'postgresql+psycopg2://' + url[len(prefix):]
     return url
 
 

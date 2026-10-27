@@ -268,7 +268,7 @@ Do **not** run them against a fresh database: the current models already create 
 ### SQLite and PostgreSQL
 
 - SQLite is the default and is suitable for local development.
-- PostgreSQL is required in production and is selected through `DATABASE_URL`; `postgres://` URLs are normalized to `postgresql://`.
+- PostgreSQL is required in production and is selected through `DATABASE_URL`; `postgres://`, `postgresql://`, and `postgresql+psycopg://` URLs are normalized to `postgresql+psycopg2://` for the installed driver.
 - Local SQLite databases under `instance/` are not committed to Git.
 - On Render, the filesystem is ephemeral, so SQLite data is lost on restart. Use the provisioned PostgreSQL database instead.
 

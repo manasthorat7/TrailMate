@@ -206,23 +206,33 @@ class TrailMateTestCase(unittest.TestCase):
     # ---------------------------------------------------------
 
     def test_postgres_url_normalization(self):
-        """Verify legacy postgres:// URLs are converted to postgresql://."""
-        legacy_url = "postgres://user:secret@host.render.com:5432/trailmate_db"
-        expected = "postgresql://user:secret@host.render.com:5432/trailmate_db"
-        self.assertEqual(normalize_database_url(legacy_url), expected)
+        """Verify every PostgreSQL URL form selects the psycopg2 driver."""
+        cases = {
+            "postgres://user:secret@host.render.com:5432/trailmate_db":
+                "postgresql+psycopg2://user:secret@host.render.com:5432/trailmate_db",
+            "postgresql://user:secret@localhost:5432/trailmate_db":
+                "postgresql+psycopg2://user:secret@localhost:5432/trailmate_db",
+            "postgresql+psycopg://user:secret@localhost:5432/trailmate_db":
+                "postgresql+psycopg2://user:secret@localhost:5432/trailmate_db",
+            "postgresql+psycopg2://user:secret@localhost:5432/trailmate_db":
+                "postgresql+psycopg2://user:secret@localhost:5432/trailmate_db",
+        }
+        for source, expected in cases.items():
+            with self.subTest(source=source):
+                self.assertEqual(normalize_database_url(source), expected)
 
-        standard_url = "postgresql://user:secret@localhost:5432/trailmate_db"
-        self.assertEqual(normalize_database_url(standard_url), standard_url)
+        sqlite_url = "sqlite:///instance/trekking.db"
+        self.assertEqual(normalize_database_url(sqlite_url), sqlite_url)
 
     def test_database_url_from_environment(self):
-        """Verify app uses DATABASE_URL from environment when configured."""
+        """Verify app uses and normalizes DATABASE_URL from the environment."""
         test_url = "postgres://trek_user:pass123@db.internal:5432/treks"
         os.environ['DATABASE_URL'] = test_url
         try:
             temp_app = create_app(test_config={'TESTING': True})
             self.assertEqual(
                 temp_app.config['SQLALCHEMY_DATABASE_URI'],
-                "postgresql://trek_user:pass123@db.internal:5432/treks"
+                "postgresql+psycopg2://trek_user:pass123@db.internal:5432/treks"
             )
         finally:
             os.environ.pop('DATABASE_URL', None)

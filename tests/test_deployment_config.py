@@ -5,7 +5,7 @@ Focused tests for Render/PostgreSQL deployment configuration:
 
 - Production refuses to start without an explicit, strong SECRET_KEY.
 - Production refuses to fall back to local SQLite.
-- Render-style ``postgres://`` URLs are normalized for SQLAlchemy.
+- Render-style PostgreSQL URLs are normalized to the installed psycopg2 driver.
 - Secure session cookies and one-hop proxy handling are enabled.
 - Documented placeholder admin passwords are rejected during provisioning.
 - The init-db CLI reports provisioning errors without echoing the password.
@@ -25,7 +25,7 @@ from models import User
 
 
 STRONG_SECRET = 'x89Fq2!vN$1z90LaQwe9876543210zyxwvutsrq'
-POSTGRES_URL = 'postgresql://trek_user:pass123@db.internal:5432/treks'
+POSTGRES_URL = 'postgresql+psycopg2://trek_user:pass123@db.internal:5432/treks'
 LEGACY_POSTGRES_URL = 'postgres://trek_user:pass123@db.internal:5432/treks'
 
 
@@ -91,7 +91,7 @@ class ProductionConfigTestCase(unittest.TestCase):
 
         self.assertEqual(
             app.config['SQLALCHEMY_DATABASE_URI'],
-            'postgresql://us%40er:p%3Ass@db.internal:5432/treks?sslmode=require',
+            'postgresql+psycopg2://us%40er:p%3Ass@db.internal:5432/treks?sslmode=require',
         )
 
     def test_production_rejects_placeholder_secret_prefix(self):
